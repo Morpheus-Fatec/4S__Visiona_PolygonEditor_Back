@@ -40,16 +40,19 @@ public class Field {
 
     @ManyToAny
     @JoinColumn(name = "id_user")
-    private User id_user;
+    private User idUser;
 
     @ManyToMany(mappedBy = "fields")
-    private Productivity id_prod;
+    private Productivity idProductivity;
 
     @Column(name = "soil")
     private String soil;
 
     @Column(name = "culture")
     private String culture;
+
+    @Column(name = "area")
+    private Float area;
 
     @Column(name = "image")
     private String image;
