@@ -13,7 +13,7 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Morpheus-olygonEditor")
+                        .title("Morpheus-PolygonEditor")
                         .version("1.0"));
     }
 }
