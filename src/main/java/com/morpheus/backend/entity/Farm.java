@@ -23,7 +23,7 @@ public class Farm {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_farm")
-    private Long id_farm;
+    private Long idFarm;
 
     @Column(name = "name_farm")
     private String farmName;
