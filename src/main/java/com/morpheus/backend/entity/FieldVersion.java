@@ -2,15 +2,12 @@ package com.morpheus.backend.entity;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.ManyToAny;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,7 +25,7 @@ public class FieldVersion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_field_version")
-    private Long id_field_ver;
+    private Long idFieldVersion;
 
     @ManyToOne
     @JoinColumn(name = "id_field")
@@ -40,7 +37,7 @@ public class FieldVersion {
 
     @ManyToOne
     @JoinColumn(name = "id_user")
-    private User id_user;
+    private User idUser;
 
     @Column(name = "polygon")
     private String polygon;

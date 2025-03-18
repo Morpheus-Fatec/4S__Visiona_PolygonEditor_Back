@@ -7,5 +7,5 @@ import com.morpheus.backend.entity.Field;
 
 @Repository
 public interface FieldRepository extends JpaRepository<Field, Long>{
-    Field getFieldById(int fieldId);
+    Field getFieldById(Long fieldId);
 }

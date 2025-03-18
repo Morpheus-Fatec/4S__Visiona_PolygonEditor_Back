@@ -19,8 +19,9 @@ public class FieldService {
 
     public String createField (FieldDTO fieldDTO) {
         try {
-            if (field != null){
-                Farm farm = farmRepository.getFarmById(fieldDTO.getFarm().getIdFarm());
+            Farm farm = farmRepository.getFarmById(fieldDTO.getFarm().getIdFarm());
+
+            if (farm != null){
                 field.setFarm(farm);
                 field.setCulture(fieldDTO.getCulture());
                 field.setIdProductivity(fieldDTO.getProductivity());
@@ -49,7 +50,7 @@ public class FieldService {
         return fieldsList;
     }
 
-    public Field getFieldById(int fieldId){
+    public Field getFieldById(Long fieldId){
         Field field = fieldRepository.getFieldById(fieldId);
         try {
             if (field != null){
@@ -62,7 +63,7 @@ public class FieldService {
         return field;
     }
 
-    public String updateFarm(int idField, Long newFarm){
+    public String updateFarm(Long idField, Long newFarm){
        String oldFarm = "";
 
         try{
@@ -76,5 +77,52 @@ public class FieldService {
         }
 
         return "Fazenda: " + oldFarm + ", atualizada para: " + farm.getFarmName(); 
+    }
+
+    public String updateCulture(Long idField, String newCulture){
+        String oldCulture = "";
+        try {
+            Field field = fieldRepository.getFieldById(idField);
+            
+            if(field != null){
+                oldCulture = field.getCulture();
+                field.setCulture(newCulture);
+            }    
+        } catch (Exception e) {
+            throw new IllegalAccessError("Não foi possível alterar a cultura do talhão" + e);
+        }
+
+        return "Cultura alterada de: " + oldCulture + " para: " + field.getCulture();
+    }
+
+    public String updateSoil(Long idField, String newSoil){
+        String oldSoil = "";
+
+        try {
+            Field field = fieldRepository.getFieldById(idField);
+
+            if (field != null) {
+                oldSoil = field.getSoil();
+                field.setSoil(newSoil);
+            }
+        } catch (Exception e) {
+            throw new IllegalAccessError("Não foi possível alterar o tipo do solo");
+        }
+
+        return "Solo alterado de: " + oldSoil + " para: " + field.getSoil();
+    }
+
+    public String deleteFieldById(Long idField){
+        try{
+            Field field = fieldRepository.getFieldById(idField);
+
+            if(field != null){
+                fieldRepository.delete(field);
+            }
+        } catch(Exception e){
+            throw new IllegalAccessError("Não foi possível deletar o talhão");
+        }
+
+        return "Talhão deletado";
     }
 }
