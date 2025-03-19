@@ -23,12 +23,11 @@ public class FieldService {
 
     public String createField (FieldDTO fieldDTO) {
         try {
-            Farm farm = farmRepository.getFarmById(fieldDTO.getFarm().getIdFarm());
+            Farm farm = farmRepository.getFarmById(fieldDTO.getFarm().getId());
 
             if (farm != null){
                 field.setFarm(farm);
                 field.setCulture(fieldDTO.getCulture());
-                field.setIdProductivity(fieldDTO.getProductivity());
                 field.setArea(fieldDTO.getArea());
                 field.setSoil(fieldDTO.getSoil());
                 fieldRepository.save(field);

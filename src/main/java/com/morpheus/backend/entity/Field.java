@@ -1,15 +1,13 @@
 package com.morpheus.backend.entity;
 
-
-import org.hibernate.annotations.ManyToAny;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -28,22 +26,19 @@ public class Field {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id_field;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "id_farm")
     private Farm farm;
 
-    @ManyToOne
-    @JoinColumn(name = "status")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     private Status status;
 
-    @ManyToAny
+    @ManyToOne
     @JoinColumn(name = "id_user")
     private User idUser;
-
-    @ManyToMany(mappedBy = "fields")
-    private Productivity idProductivity;
 
     @Column(name = "soil")
     private String soil;

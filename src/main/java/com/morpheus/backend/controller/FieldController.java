@@ -17,9 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
-
-
 @RestController
 @RequestMapping("/field")
 public class FieldController {
@@ -41,8 +38,8 @@ public class FieldController {
     }
     
     @PutMapping("/farm/{id}")
-    public String updateFarm(@PathVariable Long idField, @RequestBody Long newFarm) {
-        return fieldService.updateFarm(idField, newFarm);
+    public String updateFarm(@PathVariable Long id, @RequestBody Long newFarm) {
+        return fieldService.updateFarm(id, newFarm);
     }
 
     @PutMapping("/culture/{id}")
@@ -50,7 +47,7 @@ public class FieldController {
         return fieldService.updateCulture(idField, newCulture);
     }
 
-    @PutMapping("/culture/{id}")
+    @PutMapping("/soil/{id}")
     public String updateSoil(@PathVariable Long idField, @RequestBody String newSoil) {
         return fieldService.updateSoil(idField, newSoil);
     }

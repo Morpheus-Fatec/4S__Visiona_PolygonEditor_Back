@@ -2,11 +2,11 @@ package com.morpheus.backend.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +36,6 @@ public class User {
     @Column(name = "user_password")
     private String userPassword;
 
-    @ManyToOne
-    @JoinColumn(name = "id_role")
+    @Enumerated(EnumType.STRING)
     private Role role;
 }
