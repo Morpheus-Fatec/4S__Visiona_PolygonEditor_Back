@@ -7,8 +7,10 @@ import org.springframework.stereotype.Service;
 import com.morpheus.backend.DTO.FieldDTO;
 import com.morpheus.backend.entity.Farm;
 import com.morpheus.backend.entity.Field;
+import com.morpheus.backend.entity.Status;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
+import com.morpheus.backend.repository.StatusRepository;
 
 @Service
 public class FieldService {
@@ -16,6 +18,8 @@ public class FieldService {
     private FieldRepository fieldRepository;
     private Farm farm;
     private FarmRepository farmRepository;
+    private Status status;
+    private StatusRepository statusRepository;
 
     public String createField (FieldDTO fieldDTO) {
         try {
@@ -68,10 +72,12 @@ public class FieldService {
 
         try{
             Field field = fieldRepository.getFieldById(idField);
-            oldFarm = field.getFarm().getFarmName();
-
             Farm farm = farmRepository.getFarmById(newFarm);
-            field.setFarm(farm);
+            
+            if(field != null && farm != null){
+                oldFarm = field.getFarm().getFarmName();
+                field.setFarm(farm);
+            }
         } catch (Exception e){
             throw new IllegalAccessError("Não foi possível atualizar a fazenda para o talhão " + e);
         }
@@ -93,6 +99,25 @@ public class FieldService {
         }
 
         return "Cultura alterada de: " + oldCulture + " para: " + field.getCulture();
+    }
+
+
+    public String updateStatus(Long idField, String statusParam){
+        String oldStatus = "";
+
+        try {
+            Field field = fieldRepository.getFieldById(idField);
+
+                if(field != null && status != null){
+                    oldStatus = statusRepository.toString();
+
+                    field.setStatus(Status.valueOf(statusParam));
+                }
+            } catch (Exception e) {
+                throw new IllegalAccessError("Não foi possível alterar o status");
+            }
+
+            return "Status alterado de: " + oldStatus + " para: " + field.getStatus();
     }
 
     public String updateSoil(Long idField, String newSoil){

@@ -55,6 +55,11 @@ public class FieldController {
         return fieldService.updateSoil(idField, newSoil);
     }
 
+    @PutMapping("/status/{id}")
+    public String updateStatus(@PathVariable Long idField, String status){
+        return fieldService.updateStatus(idField, status);
+    }
+
     @DeleteMapping("/{id}")
     public String deleteFieldById(@PathVariable Long idField){
         return fieldService.deleteFieldById(idField);
