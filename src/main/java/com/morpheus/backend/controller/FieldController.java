@@ -24,7 +24,11 @@ public class FieldController {
 
     @PostMapping
     public String createField(@RequestBody FieldDTO fieldDTO) {
-        return fieldService.createField(fieldDTO);
+        try {
+            return fieldService.createField(fieldDTO);
+        } catch (Exception e) {
+            return "Não foi possível criar o talhão" + e;
+        }
     }
     
     @GetMapping()
