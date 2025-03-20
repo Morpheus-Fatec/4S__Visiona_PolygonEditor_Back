@@ -10,7 +10,6 @@ import com.morpheus.backend.entity.Field;
 import com.morpheus.backend.entity.Status;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
-import com.morpheus.backend.repository.StatusRepository;
 
 @Service
 public class FieldService {
@@ -19,7 +18,6 @@ public class FieldService {
     private Farm farm;
     private FarmRepository farmRepository;
     private Status status;
-    private StatusRepository statusRepository;
 
     public String createField (FieldDTO fieldDTO) {
         try {
@@ -108,8 +106,7 @@ public class FieldService {
             Field field = fieldRepository.getFieldById(idField);
 
                 if(field != null && status != null){
-                    oldStatus = statusRepository.toString();
-
+                    oldStatus = field.getStatus().toString();
                     field.setStatus(Status.valueOf(statusParam));
                 }
             } catch (Exception e) {
