@@ -2,6 +2,7 @@ package com.morpheus.backend.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.DTO.FieldDTO;
@@ -14,38 +15,48 @@ import com.morpheus.backend.repository.FieldRepository;
 @Service
 public class FieldService {
     private Field field;
+
+    @Autowired
     private FieldRepository fieldRepository;
+    
     private Farm farm;
+    
+    @Autowired
     private FarmRepository farmRepository;
+    
     private Status status;
 
     public String createField (FieldDTO fieldDTO) {
         try {
             Farm farm = farmRepository.getFarmById(fieldDTO.getFarm().getId());
-
-            if (farm != null){
-                field.setFarm(farm);
-                field.setCulture(fieldDTO.getCulture());
-                field.setArea(fieldDTO.getArea());
-                field.setSoil(fieldDTO.getSoil());
-                fieldRepository.save(field);
+    
+            if (farm == null) {
+                throw new Exception();
             }
+    
+            Field field = new Field();
+            field.setFarm(farm);
+            field.setCulture(fieldDTO.getCulture());
+            field.setArea(fieldDTO.getArea());
+            field.setSoil(fieldDTO.getSoil());
+    
+            fieldRepository.save(field);
+    
+            return "Talhão criado com sucesso!";
         } catch (Exception e) {
-            throw new IllegalAccessError("Não foi criado o talhão" + e);
+            throw new RuntimeException("Erro ao criar o talhão!");
         }
-
-        return "Talhão criado com sucesso!";
     }
 
     public List<Field> getAllFields(){
         List<Field> fieldsList = fieldRepository.findAll();
 
         try {
-            if (fieldsList != null){
-                
+            if (fieldsList.size() == 0){
+                throw new Exception();
             }            
         } catch (Exception e) {
-            throw new IllegalAccessError("Não existe nenhum talhão cadastrado" + e);
+            throw new RuntimeException("Não existe nenhum talhão cadastrado" + e);
         }
 
         return fieldsList;
@@ -54,11 +65,11 @@ public class FieldService {
     public Field getFieldById(Long fieldId){
         Field field = fieldRepository.getFieldById(fieldId);
         try {
-            if (field != null){
-
+            if (field == null){
+                throw new Exception();
             }
         } catch (Exception e){
-            throw new IllegalAccessError("Não existe talhão com o id " + fieldId);
+            throw new RuntimeException("Não existe talhão com o id " + fieldId);
         }
 
         return field;
@@ -71,12 +82,16 @@ public class FieldService {
             Field field = fieldRepository.getFieldById(idField);
             Farm farm = farmRepository.getFarmById(newFarm);
             
-            if(field != null && farm != null){
-                oldFarm = field.getFarm().getFarmName();
-                field.setFarm(farm);
+            if(field == null){
+                throw new IllegalAccessError("Não há talhão com o id " + idField);
+            } else if (farm == null){
+                throw new IllegalAccessError("Não há fazenda com o id " + newFarm);
             }
+            
+            oldFarm = field.getFarm().getFarmName();
+            field.setFarm(farm);
         } catch (Exception e){
-            throw new IllegalAccessError("Não foi possível atualizar a fazenda para o talhão " + e);
+            throw new RuntimeException();
         }
 
         return "Fazenda: " + oldFarm + ", atualizada para: " + farm.getFarmName(); 
