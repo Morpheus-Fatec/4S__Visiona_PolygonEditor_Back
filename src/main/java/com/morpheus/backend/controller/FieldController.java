@@ -8,6 +8,8 @@ import com.morpheus.backend.DTO.FieldDTO;
 import com.morpheus.backend.entity.Field;
 import com.morpheus.backend.service.FieldService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -25,7 +27,7 @@ public class FieldController {
     private FieldService fieldService;
 
     @PostMapping
-    public String createField(@RequestBody FieldDTO fieldDTO) throws IllegalAccessError {
+    public String createField(@Valid @RequestBody FieldDTO fieldDTO) throws Exception {
         return fieldService.createField(fieldDTO);
     }
     

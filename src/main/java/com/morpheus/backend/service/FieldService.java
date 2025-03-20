@@ -5,13 +5,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.morpheus.NotFound;
 import com.morpheus.backend.DTO.FieldDTO;
 import com.morpheus.backend.entity.Farm;
 import com.morpheus.backend.entity.Field;
 import com.morpheus.backend.entity.Status;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
+import com.morpheus.exceptions.DefaultException;
 
 @Service
 public class FieldService {
@@ -27,12 +27,16 @@ public class FieldService {
     
     private Status status;
 
-    public String createField (FieldDTO fieldDTO) throws Exception{
+    public String createField(FieldDTO fieldDTO) {
         try {
+            if (fieldDTO.getFarm() == null || fieldDTO.getFarm().getId() == null) {
+                throw new DefaultException("Farm não pode ser nulo.");
+            }
+    
             Farm farm = farmRepository.getFarmById(fieldDTO.getFarm().getId());
     
             if (farm == null) {
-                throw new Exception();
+                throw new DefaultException("Fazenda não encontrada.");
             }
     
             Field field = new Field();
@@ -45,9 +49,10 @@ public class FieldService {
     
             return "Talhão criado com sucesso!";
         } catch (Exception e) {
-            throw new IllegalAccessError("Não foi criado o talhão" + e);
+            throw new DefaultException("Erro ao criar o talhão: " + e.getMessage());
         }
     }
+    
 
     public List<Field> getAllFields(){
         List<Field> fieldsList = fieldRepository.findAll();
