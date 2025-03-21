@@ -18,6 +18,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
@@ -37,8 +38,8 @@ public class FieldController {
     }
     
     @GetMapping("/{id}")
-    public Field getFieldById(@RequestParam Long idField) throws IllegalAccessError {
-        return fieldService.getFieldById(idField);
+    public Field getFieldById(@PathVariable Long id) throws IllegalAccessError {
+        return fieldService.getFieldById(id);
     }
     
     @PutMapping("/farm/{id}")

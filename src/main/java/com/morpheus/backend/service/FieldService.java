@@ -62,7 +62,7 @@ public class FieldService {
                 throw new Exception();
             }            
         } catch (Exception e) {
-            throw new RuntimeException("Não existe nenhum talhão cadastrado" + e);
+            throw new DefaultException("Não existe nenhum talhão cadastrado" + e);
         }
 
         return fieldsList;
