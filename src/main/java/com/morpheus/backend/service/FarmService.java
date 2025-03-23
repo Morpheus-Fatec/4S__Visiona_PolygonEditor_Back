@@ -1,10 +1,8 @@
 package com.morpheus.backend.service;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.entity.Farm;
@@ -23,6 +21,11 @@ public class FarmService {
         
         try {
             Farm farm = new Farm();
+
+            if(farmDTO.getFarmName() == null || farmDTO.getFarmState() == null || farmDTO.getFarmCity() == null){
+                throw new Exception();
+            }
+
             farm.setFarmName(farmDTO.getFarmName());
             farm.setFarmState(farmDTO.getFarmState());
             farm.setFarmCity(farmDTO.getFarmCity());
@@ -40,14 +43,14 @@ public class FarmService {
         List<Farm> farmList =  farmRepository.findAll();
 
         try {
-            if (farmList == null){
+            if (farmList.size() == 0){
                 throw new Exception();
             }
 
             return farmList;
 
         } catch (Exception e) {
-            throw new DefaultException("Não há nenhuma fazendo cadastrada.");
+            throw new DefaultException("Não há nenhuma fazenda cadastrada.");
         }
     }
 
@@ -58,10 +61,42 @@ public class FarmService {
             if(farm == null){
                 throw new Exception();
             }
+
+            return farmRepository.findById(id).orElse(null);
         } catch (Exception e) {
             throw new DefaultException("Não existe a fazenda com o id " + id);
         }
-        return farmRepository.findById(id).orElse(null);
+    }
+
+    public String updateFarm(Long farmId, FarmDTO farmDTO) {
+        String oldFarmName = "";
+        String oldFarmState = "";
+        String oldFarmCity = "";
+
+        try {
+            Farm farm = farmRepository.getFarmById(farmId);
+
+            if (farm == null) {
+                throw new Exception();
+            }
+
+            if(farmDTO.getFarmName().equals("") || farmDTO.getFarmState().equals("") || farmDTO.getFarmCity().equals("")){
+                throw new DefaultException("Existem campos vazios.");
+            }
+
+            oldFarmName = farm.getFarmName();
+            oldFarmState = farm.getFarmState();
+            oldFarmCity = farm.getFarmCity();
+
+            farm.setFarmName(farmDTO.getFarmName());
+            farm.setFarmState(farmDTO.getFarmState());
+            farm.setFarmCity(farmDTO.getFarmCity());
+            farmRepository.save(farm);
+
+            return "Fazenda alterada de " + oldFarmName + ", " + oldFarmState + ", " + oldFarmCity + " para: "+farm.getFarmName().toString() + ", " + farm.getFarmState().toString() + ", " + farm.getFarmCity().toString(); 
+        } catch (Exception e) {
+            throw new DefaultException("Não foi possível alterar a fazenda.");
+        }
     }
 
     public String updateFarmName(Long farmId, FarmDTO newName) {
@@ -70,7 +105,7 @@ public class FarmService {
         try {
             Farm farm = farmRepository.getFarmById(farmId);
 
-            if (farm == null){
+            if (farm == null || newName.getFarmName().equals("")){
                 throw new Exception();
             }
             oldFarmName = farm.getFarmName();
@@ -108,7 +143,7 @@ public class FarmService {
         try {
             Farm farm = farmRepository.getFarmById(farmId);
 
-            if (farm == null){
+            if (farm == null || newCity.getFarmCity().equals("")){
                 throw new Exception();
             }
             oldFarmCity = farm.getFarmCity();

@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 
 @Entity
-@Table(name = "farm")
+@Table(name = "fazenda")
 public class Farm {
 
     @Id
