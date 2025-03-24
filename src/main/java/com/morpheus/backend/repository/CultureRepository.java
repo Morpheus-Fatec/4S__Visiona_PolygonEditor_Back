@@ -8,4 +8,8 @@ import com.morpheus.backend.entity.Culture;
 @Repository
 public interface CultureRepository extends JpaRepository<Culture, Long> {
     Culture getCultureByName(String cultureName);
+
+    Culture getCultureById(Long id);
+
+    
 }
