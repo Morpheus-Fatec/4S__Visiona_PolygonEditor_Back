@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -21,15 +22,20 @@ import lombok.Setter;
 @Setter
 
 @Entity
-@Table(name = "field")
+@Table(name = "talhao")
 public class Field {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_talhao")
     private Long id;
 
+    @ManyToMany
+    @JoinColumn(name = "id_leitura")
+    private Scan scan;
+
     @ManyToOne
-    @JoinColumn(name = "id_farm")
+    @JoinColumn(name = "id_fazenda")
     private Farm farm;
 
     @Enumerated(EnumType.STRING)
@@ -37,19 +43,19 @@ public class Field {
     private Status status;
 
     @ManyToOne
-    @JoinColumn(name = "id_user")
+    @JoinColumn(name = "id_usuario")
     private User idUser;
 
-    @Column(name = "soil")
+    @Column(name = "solo")
     private String soil;
 
-    @Column(name = "culture")
+    @Column(name = "cultura")
     private String culture;
 
     @Column(name = "area")
     private Float area;
 
-    @Column(name = "image")
+    @Column(name = "imagem")
     private String image;
 
 }

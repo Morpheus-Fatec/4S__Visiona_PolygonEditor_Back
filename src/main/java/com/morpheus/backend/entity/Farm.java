@@ -22,16 +22,15 @@ public class Farm {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_farm")
+    @Column(name = "id_fazenda")
     private Long id;
 
-    @Column(name = "name_farm")
+    @Column(name = "name")
     private String farmName;
 
-    @Column(name = "city_farm")
+    @Column(name = "cidade")
     private String farmCity;
 
-    @Column(name = "state_farm")
+    @Column(name = "estado")
     private String farmState;
-
 }
