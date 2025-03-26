@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.DTO.ImageDTO;
+import com.morpheus.backend.entity.Field;
 import com.morpheus.backend.entity.Image;
+import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.exceptions.DefaultException;
 
@@ -14,6 +16,9 @@ import com.morpheus.exceptions.DefaultException;
 public class ImageService {
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private FieldRepository fieldRepository;
 
     public String createImage(ImageDTO imageDTO) {
         try {
@@ -73,6 +78,42 @@ public class ImageService {
             return "URL: " + image.getImageUrl() + " atualizada com sucesso.";
         } catch (Exception e) {
             throw new DefaultException("Não foi possível atualizar a imagem.");
+        }
+    }
+
+    public String updateField(Long imageId, ImageDTO imageDTO){
+        try {
+            Image image = imageRepository.findById(imageId);
+            Field field = fieldRepository.getFieldById(imageDTO.getFieldId());
+
+            if(image == null || field == null) {
+                throw new Exception();
+            }
+
+            image.setFieldId(field);
+            imageRepository.save(image);
+
+            return "URL: " + image.getImageUrl() + " atualizada com sucesso.";
+        } catch (Exception e) {
+            throw new DefaultException("Não foi possível atualizar a imagem.");
+        }
+    }
+
+    public String deleteImageUrl(Long imageId){
+        String imageUrlDeleted = "";
+        try {
+            Image image = imageRepository.findById(imageId);
+
+            if(image == null){
+                throw new Exception();
+            }
+
+            imageUrlDeleted = image.getImageUrl();
+            imageRepository.delete(image);
+
+            return "Url: "+imageUrlDeleted+" deletada com sucesso";
+        } catch (Exception e) {
+            throw new DefaultException("Não foi possível deletar a URL");
         }
     }
 }

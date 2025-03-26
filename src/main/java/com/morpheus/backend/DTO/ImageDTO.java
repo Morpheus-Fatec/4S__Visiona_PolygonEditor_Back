@@ -11,4 +11,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ImageDTO {
     private String imageUrl;
+    private Long fieldId;
 }
