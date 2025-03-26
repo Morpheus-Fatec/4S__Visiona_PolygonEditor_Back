@@ -1,43 +1,31 @@
 package com.morpheus.backend.entity;
 
-import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "imagem")
+@Table(name = "ImagensApoio")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Image {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_imagem")
+    @Column(name = "id_img")
     private Long id;
 
-    @Column(name = "descricao_imagem")
-    private String imageDescription;
-
     @ManyToOne
-    @JoinColumn(name = "id_talhao")
-    private Field fieldId;
+    @JoinColumn(name = "id_leitura", nullable = false)
+    private Scan scan;
 
-    @Column(name = "imagem_url")
-    private String imageUrl;
+    @Column(name = "endereco", nullable = false, columnDefinition = "TEXT")
+    private String address;
 
-    @Column(name = "data_upload")
-    private LocalDateTime dataUpload;
+    @Column(name = "nome", nullable = false, length = 255)
+    private String name;
 }

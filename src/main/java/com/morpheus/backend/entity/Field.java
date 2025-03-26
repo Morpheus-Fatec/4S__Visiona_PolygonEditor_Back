@@ -1,17 +1,10 @@
 package com.morpheus.backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.math.BigDecimal;
+
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,7 +15,8 @@ import lombok.Setter;
 @Setter
 
 @Entity
-@Table(name = "talhao")
+@Table(name = "Talhoes")
+@Data
 public class Field {
 
     @Id
@@ -30,32 +24,38 @@ public class Field {
     @Column(name = "id_talhao")
     private Long id;
 
-    @ManyToMany
-    @JoinColumn(name = "id_leitura")
-    private Scan scan;
+    @ManyToOne
+    @JoinColumn(name = "id_leitura", nullable = true)
+    private Scan scanning;
 
     @ManyToOne
-    @JoinColumn(name = "id_fazenda")
+    @JoinColumn(name = "id_fazenda",  nullable = false)
     private Farm farm;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private Status status;
+    @Column(name = "safra", nullable = false, length = 7)
+    private String harvest;
 
     @ManyToOne
-    @JoinColumn(name = "id_usuario")
-    private User idUser;
+    @JoinColumn(name = "id_cultura", nullable = true)
+    private Culture culture;
 
-    @Column(name = "solo")
-    private String soil;
+    @ManyToOne
+    @JoinColumn(name = "id_solo")
+    private Soil soil;
 
-    @Column(name = "cultura")
-    private String culture;
+    @Column(name = "nome", nullable = false, length = 255)
+    private String name;
 
-    @Column(name = "area")
-    private Float area;
+    @Column(name = "area", nullable = false, precision = 10, scale = 2)
+    private BigDecimal area;
+    
+    @Column(name = "produtividade", nullable = false)
+    private Float productivity;
 
-    @Column(name = "imagem")
-    private String image;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false, columnDefinition = "estado_talhao")
+    private Status status;
 
+    @Column(name = "coordenadas", nullable = false, columnDefinition = "TEXT")
+    private String coordinates;
 }

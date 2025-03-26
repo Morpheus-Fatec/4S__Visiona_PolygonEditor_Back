@@ -1,26 +1,24 @@
 package com.morpheus.backend.entity;
 
 public enum Status {
-    PENDING,
-    APPROVED,
-    UNDER_ANALYSIS,
-    REJECTED,
-    NO_SOLUTION;
+    PENDING("Pendente"),
+    APPROVED("Aprovado"),
+    UNDER_ANALYSIS("Em Analise"),
+    REJECTED("Reprovado"),
+    NO_SOLUTION("Sem Solução");
 
-    public String toString(){
-        switch (this) {
-            case PENDING:
-                return "PENDING";
-            case UNDER_ANALYSIS:
-                return "UNDER_ANALYSIS";
-            case APPROVED:
-                return "APPROVED";
-            case REJECTED:
-                return "REJECTED";
-            case NO_SOLUTION:
-                return "NO_SOLUTION";
-            default: 
-                return "";
-        }
+    private final String portugueValue;
+
+    Status(String portugueValue) {
+        this.portugueValue = portugueValue;
+    }
+
+    public String getPortugueseValue(){
+        return portugueValue;
+    }
+
+    @Override
+    public String toString() {
+        return portugueValue;
     }
 }

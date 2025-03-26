@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "solos")
+@Table(name = "Solos")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -23,6 +23,6 @@ public class Soil {
     @Column(name = "id_solo")
     private Long id;
 
-    @Column(name = "nome")
+    @Column(name = "nome", nullable = false, unique = true)
     private String name;
 }

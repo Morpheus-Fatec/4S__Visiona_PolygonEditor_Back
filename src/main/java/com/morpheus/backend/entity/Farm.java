@@ -17,7 +17,7 @@ import lombok.Setter;
 @Setter
 
 @Entity
-@Table(name = "fazenda")
+@Table(name = "Fazendas")
 public class Farm {
 
     @Id
@@ -25,12 +25,12 @@ public class Farm {
     @Column(name = "id_fazenda")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "nome", nullable = false)
     private String farmName;
 
-    @Column(name = "cidade")
+    @Column(name = "cidade", nullable = false)
     private String farmCity;
 
-    @Column(name = "estado")
+    @Column(name = "estado", nullable = false)
     private String farmState;
 }

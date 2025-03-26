@@ -1,13 +1,6 @@
 package com.morpheus.backend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,24 +11,27 @@ import lombok.Setter;
 @Getter
 @Setter
 
-@Table(name = "role")
 @Entity
+@Table(name = "Usuarios")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_user")
-    private Long idUser;
+    @Column(name = "id_usuario")
+    private Long id;
 
-    @Column(name = "user_name")
-    private String userName;
-    
-    @Column(name = "user_email")
-    private String userEmail;
+    @Column(name = "senha", nullable = false, length = 255)
+    private String password;
 
-    @Column(name = "user_password")
-    private String userPassword;
+    @Column(name = "email", nullable = false, unique = true, length = 255)
+    private String email;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "administrador", nullable = false)
+    private Boolean isAdmin;
+
+    @Column(name = "consultor", nullable = false)
+    private Boolean isConsultant;
+
+    @Column(name = "analista", nullable = false)
+    private Boolean isAnalyst;
 }

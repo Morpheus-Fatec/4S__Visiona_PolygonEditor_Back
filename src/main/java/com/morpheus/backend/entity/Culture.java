@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "culturas")
+@Table(name = "Culturas")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -23,6 +23,6 @@ public class Culture {
     @Column(name = "id_cultura")
     private Long id;
 
-    @Column(name = "nome")
+    @Column(name = "nome", nullable = false, unique = true)
     private String name;
 }
