@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.GeometryDTO;
@@ -84,27 +85,36 @@ public class FieldService {
         }
     }
     
-    public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
-        List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO();
+public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
+    List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO();
 
-        List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
-            PropertiesDTO properties = new PropertiesDTO();
-            properties.setId(((Number) obj[0]).longValue());
-            properties.setNome((String) obj[1]);
-            properties.setFazenda((String) obj[2]);
-            properties.setCultura((String) obj[3]);
-            properties.setArea((BigDecimal) obj[6]); 
-            properties.setHarvest((String) obj[7]);  
+    List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
+        // Criando o DTO da Fazenda
+        FarmDTO farmDTO = new FarmDTO();
+        farmDTO.setFarmName((String) obj[2]);  
+        farmDTO.setFarmCity((String) obj[8]);  
+        farmDTO.setFarmState((String) obj[9]);  
 
-            GeometryDTO geometry = new GeometryDTO();
-            geometry.setCoordinates((String) obj[4]);
+        // Criando o DTO das propriedades
+        PropertiesDTO properties = new PropertiesDTO();
+        properties.setId(((Number) obj[0]).longValue());
+        properties.setName((String) obj[1]);  
+        properties.setFarm(farmDTO);
+        properties.setCulture((String) obj[3]);  
+        properties.setArea((BigDecimal) obj[6]);  
+        properties.setHarvest((String) obj[7]);  
 
-            FeatureSimpleDTO dto = new FeatureSimpleDTO();
-            dto.setProperties(properties);
-            dto.setGeometry(geometry);
-            dto.setStatus((String) obj[5]);
+        // Criando o DTO da geometria
+        GeometryDTO geometry = new GeometryDTO();
+        geometry.setCoordinates((String) obj[4]);
 
-            return dto;
+        // Criando o DTO da Feature
+        FeatureSimpleDTO dto = new FeatureSimpleDTO();
+        dto.setProperties(properties);
+        dto.setGeometry(geometry);
+        dto.setStatus((String) obj[5]);
+
+        return dto;
         }).collect(Collectors.toList());
 
         FeatureCollectionSimpleDTO featureCollection = new FeatureCollectionSimpleDTO();
@@ -112,6 +122,7 @@ public class FieldService {
 
         return featureCollection;
     }
+
 
     
 

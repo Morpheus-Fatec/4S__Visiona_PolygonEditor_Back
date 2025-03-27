@@ -12,20 +12,22 @@ import com.morpheus.backend.entity.Field;
 public interface FieldRepository extends JpaRepository<Field, Long>{
     Field getFieldById(Long fieldId);
     @Query(value = """
-    SELECT 
-        f.id_talhao AS id, 
-        f.nome AS nome, 
-        fa.nome AS fazenda, 
-        c.nome AS cultura,
-        f.coordenadas AS coordinates,
-        f.estado AS status,
-        f.area AS area,
-        f.safra AS harvest
-    FROM Talhoes f
-    JOIN Fazendas fa ON f.id_fazenda = fa.id_fazenda
-    LEFT JOIN Culturas c ON f.id_cultura = c.id_cultura
-    """, nativeQuery = true)
-    List<Object[]> getAllFeatureSimpleDTO();
+        SELECT 
+            t.id_talhao AS id, 
+            t.nome AS nome, 
+            fa.nome AS farmName, 
+            c.nome AS culture,
+            t.coordenadas AS coordinates,
+            t.estado AS status,
+            t.area AS area,
+            t.safra AS harvest,
+            fa.cidade as farmCity,
+            fa.estado as farmState
+        FROM Talhoes t
+        JOIN Fazendas fa ON t.id_fazenda = fa.id_fazenda
+        LEFT JOIN Culturas c ON t.id_cultura = c.id_cultura
+        """, nativeQuery = true)
+        List<Object[]> getAllFeatureSimpleDTO();
 
 
 }
