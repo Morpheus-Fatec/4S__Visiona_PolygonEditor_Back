@@ -11,10 +11,10 @@ public class PropertiesDTO {
 
     private Long id;
     private String name;
-    private FarmDTO farm;
     private String culture;
     private BigDecimal area;
     private String harvest;
     private String status;
+    private FarmDTO farm;
 }
 
