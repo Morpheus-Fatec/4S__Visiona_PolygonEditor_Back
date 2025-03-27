@@ -1,5 +1,6 @@
 package com.morpheus.backend.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,37 +86,33 @@ public class FieldService {
     
     public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
         List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO();
-    
-        // Mapeando os resultados para uma lista de FeatureSimpleDTO
+
         List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
-            // Preenchendo as propriedades do DTO
             PropertiesDTO properties = new PropertiesDTO();
             properties.setId(((Number) obj[0]).longValue());
             properties.setNome((String) obj[1]);
             properties.setFazenda((String) obj[2]);
             properties.setCultura((String) obj[3]);
-    
-            // Preenchendo a geometria do DTO
+            properties.setArea((BigDecimal) obj[6]); 
+            properties.setHarvest((String) obj[7]);  
+
             GeometryDTO geometry = new GeometryDTO();
             geometry.setCoordinates((String) obj[4]);
-    
-            // Preenchendo o FeatureSimpleDTO
+
             FeatureSimpleDTO dto = new FeatureSimpleDTO();
             dto.setProperties(properties);
             dto.setGeometry(geometry);
             dto.setStatus((String) obj[5]);
-    
+
             return dto;
         }).collect(Collectors.toList());
-    
-        // Criando e retornando o FeatureCollectionSimpleDTO com os dados mapeados
+
         FeatureCollectionSimpleDTO featureCollection = new FeatureCollectionSimpleDTO();
         featureCollection.setFeatures(featureSimpleDTOList);
-    
+
         return featureCollection;
     }
 
-    public String cultureFloatToString(Float culture){
-        return culture.toString();
-    }
+    
+
 }
