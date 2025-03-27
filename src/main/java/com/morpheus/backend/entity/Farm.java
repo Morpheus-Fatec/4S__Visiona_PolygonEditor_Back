@@ -25,9 +25,9 @@ public class Farm {
     @Column(name = "nome", nullable = false)
     private String farmName;
 
-    @Column(name = "cidade", nullable = false)
+    @Column(name = "cidade")
     private String farmCity;
 
-    @Column(name = "estado", nullable = false)
+    @Column(name = "estado")
     private String farmState;
 }

@@ -2,6 +2,7 @@ package com.morpheus.backend.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,11 +19,9 @@ import com.morpheus.backend.service.FarmService;
 @RestController
 @RequestMapping("/farm")
 public class FarmController {
+    @Autowired
     private FarmService farmService;
 
-    public FarmController(FarmService farmService){
-        this.farmService = farmService;
-    }
 
     @PostMapping
     public String createFarm(@RequestBody FarmDTO farmDTO) throws Exception{

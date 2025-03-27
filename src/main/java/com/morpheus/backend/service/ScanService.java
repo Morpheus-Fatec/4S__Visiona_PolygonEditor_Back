@@ -3,19 +3,20 @@ package com.morpheus.backend.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.morpheus.backend.DTO.ScanTestDTO;
 import com.morpheus.backend.entity.Scan;
 import com.morpheus.backend.repository.ScanRepository;
 
 @Service
 public class ScanService {
     @Autowired
-    public ScanRepository scanRepository;
+    private ScanRepository scanRepository;
 
-    public String createScan(){
+    public Scan createScan(ScanTestDTO scanDTO) {
         Scan scan = new Scan();
         
-        Long idScan = scan.getId();
-
-        return "Scan "+ idScan + " criado com sucesso";
+        scanRepository.save(scan);
+        
+        return scan;
     }
 }

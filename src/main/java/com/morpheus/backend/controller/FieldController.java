@@ -4,13 +4,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.morpheus.backend.DTO.FieldDTO;
 import com.morpheus.backend.entity.Field;
 import com.morpheus.backend.service.FieldService;
 
-import jakarta.validation.Valid;
-
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
@@ -27,11 +23,6 @@ public class FieldController {
     @Autowired
     private FieldService fieldService;
 
-    @PostMapping
-    public String createField(@Valid @RequestBody FieldDTO fieldDTO) throws Exception {
-        return fieldService.createField(fieldDTO);
-    }
-    
     @GetMapping()
     public List<Field> getAllFields() throws IllegalAccessError {
         return fieldService.getAllFields();
@@ -47,15 +38,6 @@ public class FieldController {
         return fieldService.updateFarm(id, newFarm);
     }
 
-    @PutMapping("/culture/{id}")
-    public String updateCulture(@RequestParam Long idField, @RequestBody String newCulture) {
-        return fieldService.updateCulture(idField, newCulture);
-    }
-
-    @PutMapping("/soil/{id}")
-    public String updateSoil(@RequestParam Long idField, @RequestBody String newSoil) {
-        return fieldService.updateSoil(idField, newSoil);
-    }
 
     @PutMapping("/status/{id}")
     public String updateStatus(@RequestParam Long idField, String status){

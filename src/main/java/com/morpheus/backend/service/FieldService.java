@@ -5,12 +5,17 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.morpheus.backend.DTO.FieldDTO;
+import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.entity.Farm;
 import com.morpheus.backend.entity.Field;
+import com.morpheus.backend.entity.Scan;
+import com.morpheus.backend.entity.Soil;
 import com.morpheus.backend.entity.Status;
+import com.morpheus.backend.repository.CultureRepository;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
+import com.morpheus.backend.repository.SoilRepository;
 import com.morpheus.exceptions.DefaultException;
 
 @Service
@@ -24,30 +29,49 @@ public class FieldService {
     
     @Autowired
     private FarmRepository farmRepository;
+
+    @Autowired
+    private CultureRepository cultureRepository;
+
+    @Autowired
+    private SoilRepository soilRepository;
     
     private Status status;
 
-    public String createField(FieldDTO fieldDTO) {
+    public Field createField(CreateFieldDTO fieldDTO, Scan scan){ 
         try {
-            if (fieldDTO.getFarm() == null || fieldDTO.getFarm().getId() == null) {
+            if (fieldDTO.getFarmname().isEmpty()){
                 throw new DefaultException("Farm não pode ser nulo.");
             }
-    
-            Farm farm = farmRepository.getFarmById(fieldDTO.getFarm().getId());
-    
-            if (farm == null) {
-                throw new DefaultException("Fazenda não encontrada.");
-            }
+
+            Farm farmField = new Farm();
+            farmField.setFarmName(fieldDTO.getFarmname());
+            Farm farm = farmRepository.save(farmField);
+
+            Culture farmCulture = new Culture();  
+            farmCulture.setName(fieldDTO.getCulture());
+            Culture culture = cultureRepository.save(farmCulture);
+
+            Soil farmSoil = new Soil();
+            farmSoil.setName(fieldDTO.getSoil());
+            Soil soil = soilRepository.save(farmSoil);
     
             Field field = new Field();
             field.setFarm(farm);
-            field.setCulture(fieldDTO.getCulture());
+            field.setHarvest(fieldDTO.getHarvest());
+            field.setCulture(culture);
+            field.setSoil(soil);
+            field.setName(fieldDTO.getFarmname());
             field.setArea(fieldDTO.getArea());
-            field.setSoil(fieldDTO.getSoil());
-    
+            field.setProductivity(fieldDTO.getProductivity());
+            field.setStatus(Status.fromPortuguese("Pendente"));
+            field.setCoordinates(fieldDTO.getCoordinates());
+            field.setScanning(scan);
             fieldRepository.save(field);
     
-            return "Talhão criado com sucesso!";
+            return field;
+
+    
         } catch (Exception e) {
             throw new DefaultException("Erro ao criar o talhão: " + e.getMessage());
         }
@@ -103,22 +127,6 @@ public class FieldService {
         return "Fazenda: " + oldFarm + ", atualizada para: " + farm.getFarmName(); 
     }
 
-    public String updateCulture(Long idField, String newCulture){
-        String oldCulture = "";
-        try {
-            Field field = fieldRepository.getFieldById(idField);
-            
-            if(field != null){
-                oldCulture = field.getCulture();
-                field.setCulture(newCulture);
-            }    
-        } catch (Exception e) {
-            throw new IllegalAccessError("Não foi possível alterar a cultura do talhão" + e);
-        }
-
-        return "Cultura alterada de: " + oldCulture + " para: " + field.getCulture();
-    }
-
 
     public String updateStatus(Long idField, String statusParam){
         String oldStatus = "";
@@ -137,22 +145,6 @@ public class FieldService {
             return "Status alterado de: " + oldStatus + " para: " + field.getStatus();
     }
 
-    public String updateSoil(Long idField, String newSoil){
-        String oldSoil = "";
-
-        try {
-            Field field = fieldRepository.getFieldById(idField);
-
-            if (field != null) {
-                oldSoil = field.getSoil();
-                field.setSoil(newSoil);
-            }
-        } catch (Exception e) {
-            throw new IllegalAccessError("Não foi possível alterar o tipo do solo");
-        }
-
-        return "Solo alterado de: " + oldSoil + " para: " + field.getSoil();
-    }
 
     public String deleteFieldById(Long idField){
         try{

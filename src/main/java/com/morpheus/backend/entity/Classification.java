@@ -19,7 +19,7 @@ public class Classification {
     @Column(name = "id_classificacao")
     private Long id;
 
-    @Column(name = "coordenadas_atuais", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "coordenadas_atuais", columnDefinition = "TEXT")
     private String currentCoordinates;
 
     @Column(name = "coordenadas_originais", nullable = false, columnDefinition = "TEXT")
@@ -29,9 +29,8 @@ public class Classification {
     @JoinColumn(name = "id_talhao", nullable = false)
     private Field field;
 
-    @ManyToOne
-    @JoinColumn(name = "id_classe", nullable = true)
-    private ClassEntity classEntity;
+    @Column(name = "classe", nullable = false, length = 15)
+    private String classEntity;    
 
     @Column(name = "area", nullable = false, precision = 10, scale = 2)
     private BigDecimal area;
