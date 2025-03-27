@@ -103,6 +103,7 @@ public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
         properties.setCulture((String) obj[3]);  
         properties.setArea((BigDecimal) obj[6]);  
         properties.setHarvest((String) obj[7]);  
+        properties.setStatus((String) obj[5]);
 
         // Criando o DTO da geometria
         GeometryDTO geometry = new GeometryDTO();
@@ -112,7 +113,6 @@ public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
         FeatureSimpleDTO dto = new FeatureSimpleDTO();
         dto.setProperties(properties);
         dto.setGeometry(geometry);
-        dto.setStatus((String) obj[5]);
 
         return dto;
         }).collect(Collectors.toList());
