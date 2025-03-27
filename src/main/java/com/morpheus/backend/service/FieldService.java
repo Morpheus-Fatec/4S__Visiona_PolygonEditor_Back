@@ -38,7 +38,7 @@ public class FieldService {
     @Autowired
     private SoilRepository soilRepository;
 
-    public Field createField(CreateFieldDTO fieldDTO, Scan scan){ 
+    public Field createField(CreateFieldDTO fieldDTO, Scan scan){
         try {
             if (fieldDTO.getFarmname().isEmpty()){
                 throw new DefaultException("Farm não pode ser nulo.");
@@ -114,6 +114,8 @@ public class FieldService {
     
         return featureCollection;
     }
-    
 
+    public String cultureFloatToString(Float culture){
+        return culture.toString();
+    }
 }

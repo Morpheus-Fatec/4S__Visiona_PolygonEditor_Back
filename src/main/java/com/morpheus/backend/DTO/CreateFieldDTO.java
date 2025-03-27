@@ -23,7 +23,7 @@ public class CreateFieldDTO {
     private String name;
     @NotNull(message = "Farm não pode ser nulo.")
     private String Farmname;
-    private Float productivity;
+    private String productivity;
     private String soil;
     private List<ClassificationDTO> classification;
 
