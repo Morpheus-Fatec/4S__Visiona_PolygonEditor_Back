@@ -2,15 +2,12 @@ package com.morpheus.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-
+@Data
 @Entity
 @Table(name = "Usuarios")
 public class User {
