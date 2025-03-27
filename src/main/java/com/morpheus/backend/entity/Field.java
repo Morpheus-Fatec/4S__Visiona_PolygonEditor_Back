@@ -48,7 +48,7 @@ public class Field {
     private Float productivity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "estado", nullable = false, columnDefinition = "estado_talhao")
+    @Column(name = "estado", nullable = false)
     private Status status;
 
     @Column(name = "coordenadas", nullable = false, columnDefinition = "TEXT")

@@ -21,4 +21,14 @@ public enum Status {
     public String toString() {
         return portugueValue;
     }
+
+    public static Status fromPortuguese(String value) {
+        for (Status status : Status.values()) {
+            if (status.getPortugueseValue().equalsIgnoreCase(value)) {
+                return status;
+            }
+        }
+        throw new IllegalArgumentException("Status inválido: " + value);
+    }
+    
 }

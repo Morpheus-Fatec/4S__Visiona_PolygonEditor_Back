@@ -4,8 +4,7 @@ import lombok.Data;
 
 @Data
 public class FeatureSimpleDTO {
-
-    private String type = "FeatureCollection";
+    private final String type = "Feature";
     private PropertiesDTO properties;
     private GeometryDTO geometry;
     private String status;
