@@ -14,6 +14,5 @@ public class FeatureDTO {
     private GeometryDTO geometry;
     private ClassificationDTO classification;
     private List<ImageViewDTO> images;
-    private String status;
 
 }

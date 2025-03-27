@@ -15,5 +15,6 @@ public class PropertiesDTO {
     private String culture;
     private BigDecimal area;
     private String harvest;
+    private String status;
 }
 
