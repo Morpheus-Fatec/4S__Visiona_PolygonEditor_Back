@@ -29,8 +29,9 @@ public class Classification {
     @JoinColumn(name = "id_talhao", nullable = false)
     private Field field;
 
-    @Column(name = "classe", nullable = false, length = 15)
-    private String classEntity;    
+    @ManyToOne
+    @JoinColumn(name = "id_classe", referencedColumnName = "id_classe", nullable = false) 
+    private ClassEntity classEntity;    
 
     @Column(name = "area", nullable = false, precision = 10, scale = 2)
     private BigDecimal area;

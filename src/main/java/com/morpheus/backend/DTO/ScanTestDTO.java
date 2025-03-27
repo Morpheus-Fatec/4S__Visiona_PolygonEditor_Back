@@ -1,8 +1,10 @@
 package com.morpheus.backend.DTO;
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
 public class ScanTestDTO {
-    private CreateFieldDTO field;
+    private List<CreateFieldDTO> fields;
 }

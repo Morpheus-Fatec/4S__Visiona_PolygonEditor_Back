@@ -9,7 +9,7 @@ import lombok.Data;
 public class ClassificationDTO {
 
     private BigDecimal area;
-    private String coordiantes;
+    private String coordinates;
     private String classEntity;
 
 }

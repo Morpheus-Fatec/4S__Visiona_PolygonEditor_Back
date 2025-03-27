@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class GeometryDTO {
 
-    private String type = "Polygon";
+    private String type = "MultiPolygon";
     private String coordinates;
 
 }

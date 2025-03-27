@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.GeometryDTO;
 import com.morpheus.backend.DTO.GeoJsonView.PropertiesDTO;
@@ -47,20 +48,26 @@ public class FieldService {
             farmField.setFarmName(fieldDTO.getFarmname());
             Farm farm = farmRepository.save(farmField);
 
-            Culture farmCulture = new Culture();  
-            farmCulture.setName(fieldDTO.getCulture());
-            Culture culture = cultureRepository.save(farmCulture);
+            Culture culture = cultureRepository.findByName(fieldDTO.getCulture())
+            .orElseGet(() -> {
+                Culture newCulture = new Culture();
+                newCulture.setName(fieldDTO.getCulture());
+                return cultureRepository.save(newCulture);
+            });
 
-            Soil farmSoil = new Soil();
-            farmSoil.setName(fieldDTO.getSoil());
-            Soil soil = soilRepository.save(farmSoil);
+            Soil soil = soilRepository.findByName(fieldDTO.getSoil())
+            .orElseGet(() -> {
+                Soil newSoil = new Soil();
+                newSoil.setName(fieldDTO.getSoil());
+                return soilRepository.save(newSoil);
+            });
     
             Field field = new Field();
             field.setFarm(farm);
             field.setHarvest(fieldDTO.getHarvest());
             field.setCulture(culture);
             field.setSoil(soil);
-            field.setName(fieldDTO.getFarmname());
+            field.setName(fieldDTO.getName());
             field.setArea(fieldDTO.getArea());
             field.setProductivity(fieldDTO.getProductivity());
             field.setStatus(Status.fromPortuguese("Pendente"));
@@ -76,27 +83,37 @@ public class FieldService {
         }
     }
     
-     public List<FeatureSimpleDTO> getAllFeatureSimpleDTO() {
+    public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
         List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO();
-
-        return results.stream().map(obj -> {
+    
+        // Mapeando os resultados para uma lista de FeatureSimpleDTO
+        List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
+            // Preenchendo as propriedades do DTO
             PropertiesDTO properties = new PropertiesDTO();
             properties.setId(((Number) obj[0]).longValue());
             properties.setNome((String) obj[1]);
             properties.setFazenda((String) obj[2]);
             properties.setCultura((String) obj[3]);
-
+    
+            // Preenchendo a geometria do DTO
             GeometryDTO geometry = new GeometryDTO();
-            geometry.setCoordinates((String) obj[4]);  // Lembre-se que `coordinates` é uma **string**
-
+            geometry.setCoordinates((String) obj[4]);
+    
+            // Preenchendo o FeatureSimpleDTO
             FeatureSimpleDTO dto = new FeatureSimpleDTO();
             dto.setProperties(properties);
             dto.setGeometry(geometry);
             dto.setStatus((String) obj[5]);
-
+    
             return dto;
         }).collect(Collectors.toList());
+    
+        // Criando e retornando o FeatureCollectionSimpleDTO com os dados mapeados
+        FeatureCollectionSimpleDTO featureCollection = new FeatureCollectionSimpleDTO();
+        featureCollection.setFeatures(featureSimpleDTOList);
+    
+        return featureCollection;
     }
+    
 
-   
 }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.ScanTestDTO;
 import com.morpheus.backend.entity.Scan;
 import com.morpheus.backend.entity.Field;
@@ -31,14 +32,13 @@ public class ScanController {
 
     @PostMapping
     public void createScan(@RequestBody ScanTestDTO scan) {
-        System.out.println("scan: " + scan);
+        
         Scan scanCreated = scanService.createScan(scan);
-        System.out.println("scanCreated: " + scan);
-        System.out.println("field: " + scan.getField());
-        Field fieldCreated = fieldService.createField(scan.getField(), scanCreated);
-        System.out.println("fieldCreated: " + fieldCreated);
-        System.out.println("classification: " + scan.getField().getClassification());
-        classificationService.createClassification(fieldCreated, scan.getField().getClassification());
+        
+        for (CreateFieldDTO fieldDTO : scan.getFields()) {
+            Field fieldCreated = fieldService.createField(fieldDTO, scanCreated);   
+            classificationService.createClassification(fieldCreated, fieldDTO.getClassification());
+        }
     }
 
     @GetMapping
