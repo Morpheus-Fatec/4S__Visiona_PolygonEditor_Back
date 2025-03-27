@@ -1,5 +1,7 @@
 package com.morpheus.backend.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,5 +20,9 @@ public class ScanService {
         scanRepository.save(scan);
         
         return scan;
+    }
+
+    public List<Scan> getAllScans() {
+        return scanRepository.findAll();
     }
 }

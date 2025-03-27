@@ -3,10 +3,7 @@ package com.morpheus.backend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,33 +30,4 @@ public class FarmController {
         return farmService.getAllFarms();
     }
 
-    @GetMapping("/{id}")
-    public Farm getFarmById(@PathVariable Long id) throws Exception{
-        return farmService.getFarmById(id);
-    }
-
-    @PutMapping("{id}")
-    public String updateFarm(@PathVariable Long id, @RequestBody FarmDTO newFarm) throws Exception{
-        return farmService.updateFarm(id, newFarm);
-    }
-
-    @PutMapping("/name/{id}")
-    public String updatefarmName(@PathVariable Long id, @RequestBody FarmDTO newName) throws Exception{
-        return farmService.updateFarmName(id, newName);
-    }
-
-    @PutMapping("/state/{id}")
-    public String updatefarmState(@PathVariable Long id, @RequestBody FarmDTO newState) throws Exception{
-        return farmService.updateFarmState(id, newState);
-    }
-
-    @PutMapping("/city/{id}")
-    public String updateFarmCity(@PathVariable Long id, @RequestBody FarmDTO newCity) throws Exception{
-        return farmService.updateFarmCity(id, newCity);
-    }
-
-    @DeleteMapping("{id}")
-    public String deleteFarm(@PathVariable Long id) throws Exception{
-        return farmService.deleteFarmById(id);
-    }
 }

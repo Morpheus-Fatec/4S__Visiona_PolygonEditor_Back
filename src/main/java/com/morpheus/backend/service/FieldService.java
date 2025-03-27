@@ -1,11 +1,15 @@
 package com.morpheus.backend.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
+import com.morpheus.backend.DTO.GeoJsonView.GeometryDTO;
+import com.morpheus.backend.DTO.GeoJsonView.PropertiesDTO;
 import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.entity.Farm;
 import com.morpheus.backend.entity.Field;
@@ -20,12 +24,9 @@ import com.morpheus.exceptions.DefaultException;
 
 @Service
 public class FieldService {
-    private Field field;
 
     @Autowired
     private FieldRepository fieldRepository;
-    
-    private Farm farm;
     
     @Autowired
     private FarmRepository farmRepository;
@@ -35,8 +36,6 @@ public class FieldService {
 
     @Autowired
     private SoilRepository soilRepository;
-    
-    private Status status;
 
     public Field createField(CreateFieldDTO fieldDTO, Scan scan){ 
         try {
@@ -77,86 +76,27 @@ public class FieldService {
         }
     }
     
+     public List<FeatureSimpleDTO> getAllFeatureSimpleDTO() {
+        List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO();
 
-    public List<Field> getAllFields(){
-        List<Field> fieldsList = fieldRepository.findAll();
+        return results.stream().map(obj -> {
+            PropertiesDTO properties = new PropertiesDTO();
+            properties.setId(((Number) obj[0]).longValue());
+            properties.setNome((String) obj[1]);
+            properties.setFazenda((String) obj[2]);
+            properties.setCultura((String) obj[3]);
 
-        try {
-            if (fieldsList.size() == 0){
-                throw new Exception();
-            }            
-        } catch (Exception e) {
-            throw new DefaultException("Não existe nenhum talhão cadastrado" + e);
-        }
+            GeometryDTO geometry = new GeometryDTO();
+            geometry.setCoordinates((String) obj[4]);  // Lembre-se que `coordinates` é uma **string**
 
-        return fieldsList;
+            FeatureSimpleDTO dto = new FeatureSimpleDTO();
+            dto.setProperties(properties);
+            dto.setGeometry(geometry);
+            dto.setStatus((String) obj[5]);
+
+            return dto;
+        }).collect(Collectors.toList());
     }
 
-    public Field getFieldById(Long fieldId){
-        Field field = fieldRepository.getFieldById(fieldId);
-        try {
-            if (field == null){
-                throw new Exception();
-            }
-        } catch (Exception e){
-            throw new RuntimeException("Não existe talhão com o id " + fieldId);
-        }
-
-        return field;
-    }
-
-    public String updateFarm(Long idField, Long newFarm){
-       String oldFarm = "";
-
-        try{
-            Field field = fieldRepository.getFieldById(idField);
-            Farm farm = farmRepository.getFarmById(newFarm);
-            
-            if(field == null){
-                throw new IllegalAccessError("Não há talhão com o id " + idField);
-            } else if (farm == null){
-                throw new IllegalAccessError("Não há fazenda com o id " + newFarm);
-            }
-            
-            oldFarm = field.getFarm().getFarmName();
-            field.setFarm(farm);
-        } catch (Exception e){
-            throw new RuntimeException();
-        }
-
-        return "Fazenda: " + oldFarm + ", atualizada para: " + farm.getFarmName(); 
-    }
-
-
-    public String updateStatus(Long idField, String statusParam){
-        String oldStatus = "";
-
-        try {
-            Field field = fieldRepository.getFieldById(idField);
-
-                if(field != null && status != null){
-                    oldStatus = field.getStatus().toString();
-                    field.setStatus(Status.valueOf(statusParam));
-                }
-            } catch (Exception e) {
-                throw new IllegalAccessError("Não foi possível alterar o status");
-            }
-
-            return "Status alterado de: " + oldStatus + " para: " + field.getStatus();
-    }
-
-
-    public String deleteFieldById(Long idField){
-        try{
-            Field field = fieldRepository.getFieldById(idField);
-
-            if(field != null){
-                fieldRepository.delete(field);
-            }
-        } catch(Exception e){
-            throw new IllegalAccessError("Não foi possível deletar o talhão");
-        }
-
-        return "Talhão deletado";
-    }
+   
 }

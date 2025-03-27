@@ -1,10 +1,13 @@
 package com.morpheus.backend.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 import com.morpheus.backend.DTO.ScanTestDTO;
 import com.morpheus.backend.entity.Scan;
@@ -36,7 +39,10 @@ public class ScanController {
         System.out.println("fieldCreated: " + fieldCreated);
         System.out.println("classification: " + scan.getField().getClassification());
         classificationService.createClassification(fieldCreated, scan.getField().getClassification());
-        
+    }
 
+    @GetMapping
+    public List<Scan> getAllScans() {
+        return scanService.getAllScans();
     }
 }

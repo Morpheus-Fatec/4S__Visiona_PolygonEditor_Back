@@ -31,7 +31,7 @@ public class SoilService {
         }
     }
 
-    public List<Soil> getAllSoil() {
+    public List<Soil> getAllSoils() {
         try {
             List<Soil> soils = soilRepository.findAll();
 
@@ -44,54 +44,4 @@ public class SoilService {
             throw new DefaultException("Não foi possível encontrar tipos de solo.");
         }
     }
-    
-    public Soil getSoilById(Long id) {
-        try {
-            Soil soil = soilRepository.findById(id).get();
-
-            if (soil == null) {
-                throw new Exception();
-            }
-
-            return soil;
-        } catch (Exception e) {
-            throw new DefaultException("Não foi possível encontrar o tipo de solo.");
-        }
-    }
-
-    public String updateSoilName(Long id, String soilName) {
-        try {
-            String oldName = "";
-            Soil soil = soilRepository.getSoilById(id);
-
-            if (soil == null) {
-                throw new Exception();
-            }
-            if (soilName.isEmpty()) {
-                throw new Exception();
-            }
-
-            oldName = soil.getName();
-            soil.setName(soilName);
-            soilRepository.save(soil);
-
-            return "Nome do solo atualizado de " + oldName + " para " + soilName + ".";
-        } catch (Exception e) {
-            throw new DefaultException("Não foi possível atualizar o tipo de solo.");
-        }
-    }
-
-    public String deleteSoil(Long id) {
-        try {
-            Soil soil = soilRepository.getSoilById(id);
-            if(soil == null){
-                throw new Exception();
-            }
-            soilRepository.delete(soil);
-            return "Tipo de solo " + soil.getName() + " deletado com sucesso.";
-        } catch (Exception e) {
-            throw new DefaultException("Não foi possível deletar o tipo de solo.");
-        }
-    }
-
 }
