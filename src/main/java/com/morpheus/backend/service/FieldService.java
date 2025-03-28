@@ -69,7 +69,7 @@ public class FieldService {
             field.setHarvest(fieldDTO.getHarvest());
             field.setCulture(culture);
             field.setSoil(soil);
-            field.setName(fieldDTO.getName());
+            field.setName(fieldDTO.getNameField());
             field.setArea(fieldDTO.getArea());
             field.setProductivity(fieldDTO.getProductivity());
             field.setStatus(Status.fromPortuguese("Pendente"));
