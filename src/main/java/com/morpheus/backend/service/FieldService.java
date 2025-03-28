@@ -1,13 +1,17 @@
 package com.morpheus.backend.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
+import com.morpheus.backend.DTO.GeoJsonView.FeatureDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.GeometryDTO;
 import com.morpheus.backend.DTO.GeoJsonView.PropertiesDTO;
@@ -91,9 +95,9 @@ public class FieldService {
             // Preenchendo as propriedades do DTO
             PropertiesDTO properties = new PropertiesDTO();
             properties.setId(((Number) obj[0]).longValue());
-            properties.setNome((String) obj[1]);
-            properties.setFazenda((String) obj[2]);
-            properties.setCultura((String) obj[3]);
+            properties.setName((String) obj[1]);
+            properties.setFarm((String) obj[2]);
+            properties.setCulture((String) obj[3]);
     
             // Preenchendo a geometria do DTO
             GeometryDTO geometry = new GeometryDTO();
@@ -115,5 +119,34 @@ public class FieldService {
         return featureCollection;
     }
     
+    public FeatureCollectionDTO getCompleteField(){
+        List<Object[]> results = fieldRepository.getAllCompleteField();
 
+        List<FeatureDTO> featureDTOList = results.stream().map(obj -> {
+            PropertiesDTO properties = new PropertiesDTO();
+            properties.setId((Long)obj[0]);
+            properties.setName((String)obj[5]);
+            properties.setFarm((String)obj[3]);
+            properties.setCulture((String)obj[5]);
+
+            ClassificationDTO classification = new ClassificationDTO();
+            classification.setCoordinates((String) obj[11]);
+            classification.setArea((BigDecimal) obj[8]);
+
+            GeometryDTO geometry = new GeometryDTO();
+            geometry.setCoordinates((String) obj[11]);
+
+            FeatureDTO dto = new FeatureDTO();
+            dto.setProperties(properties);
+            dto.setClassification(classification);
+            dto.setGeometry(geometry);
+
+            return dto;
+        }).collect(Collectors.toList());
+
+        FeatureCollectionDTO featureCollection = new FeatureCollectionDTO();
+        featureCollection.setFeatures(featureDTOList);
+
+        return featureCollection;
+    }
 }

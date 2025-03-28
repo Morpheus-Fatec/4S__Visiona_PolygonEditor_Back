@@ -6,9 +6,9 @@ import lombok.Data;
 public class PropertiesDTO {
 
     private Long id;
-    private String nome;
-    private String fazenda;
-    private String cultura;
+    private String name;
+    private String farm;
+    private String culture;
 
 }
 

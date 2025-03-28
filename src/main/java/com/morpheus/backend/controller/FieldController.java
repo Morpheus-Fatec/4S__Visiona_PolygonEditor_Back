@@ -3,6 +3,7 @@ package com.morpheus.backend.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.service.FieldService;
 
@@ -23,6 +24,13 @@ public class FieldController {
         FeatureCollectionSimpleDTO featureCollectionSimpleDTO = fieldService.getAllFeatureCollectionSimpleDTO();
 
         return ResponseEntity.ok(featureCollectionSimpleDTO);
+    }
+
+    @GetMapping("/featureCollection")
+    public ResponseEntity<FeatureCollectionDTO> getAllFeatureCollectionDTO() throws IllegalAccessError {
+        FeatureCollectionDTO featureCollectionDTO = fieldService.getCompleteField();
+
+        return ResponseEntity.ok(featureCollectionDTO);
     }
     
    
