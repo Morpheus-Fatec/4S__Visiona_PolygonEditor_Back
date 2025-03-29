@@ -9,11 +9,13 @@ import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
-import com.morpheus.backend.DTO.GeoJsonView.FeatureDTO;
+import com.morpheus.backend.DTO.GeoJsonView.FieldFeatureDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.GeometryDTO;
+import com.morpheus.backend.DTO.GeoJsonView.ImageViewDTO;
 import com.morpheus.backend.DTO.GeoJsonView.PropertiesDTO;
 import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.entity.Farm;
@@ -24,6 +26,7 @@ import com.morpheus.backend.entity.Status;
 import com.morpheus.backend.repository.CultureRepository;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
+import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
 import com.morpheus.exceptions.DefaultException;
 
@@ -41,6 +44,9 @@ public class FieldService {
 
     @Autowired
     private SoilRepository soilRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     public Field createField(CreateFieldDTO fieldDTO, Scan scan){ 
         try {
@@ -90,62 +96,89 @@ public class FieldService {
     public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
         List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO();
     
-        // Mapeando os resultados para uma lista de FeatureSimpleDTO
         List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
-            // Preenchendo as propriedades do DTO
+            // Criando o DTO da Fazenda
+            FarmDTO farmDTO = new FarmDTO();
+            farmDTO.setFarmName((String) obj[2]);  
+            farmDTO.setFarmCity((String) obj[8]);  
+            farmDTO.setFarmState((String) obj[9]);  
+    
+            // Criando o DTO das propriedades
             PropertiesDTO properties = new PropertiesDTO();
             properties.setId(((Number) obj[0]).longValue());
-            properties.setName((String) obj[1]);
-            properties.setFarm((String) obj[2]);
-            properties.setCulture((String) obj[3]);
+            properties.setName((String) obj[1]);  
+            properties.setFarm(farmDTO);
+            properties.setCulture((String) obj[3]);  
+            properties.setArea((BigDecimal) obj[6]);  
+            properties.setHarvest((String) obj[7]);  
+            properties.setStatus((String) obj[5]);
     
-            // Preenchendo a geometria do DTO
+            // Criando o DTO da geometria
             GeometryDTO geometry = new GeometryDTO();
             geometry.setCoordinates((String) obj[4]);
     
-            // Preenchendo o FeatureSimpleDTO
+            // Criando o DTO da Feature
             FeatureSimpleDTO dto = new FeatureSimpleDTO();
             dto.setProperties(properties);
             dto.setGeometry(geometry);
-            dto.setStatus((String) obj[5]);
     
             return dto;
-        }).collect(Collectors.toList());
+            }).collect(Collectors.toList());
     
-        // Criando e retornando o FeatureCollectionSimpleDTO com os dados mapeados
-        FeatureCollectionSimpleDTO featureCollection = new FeatureCollectionSimpleDTO();
-        featureCollection.setFeatures(featureSimpleDTOList);
+            FeatureCollectionSimpleDTO featureCollection = new FeatureCollectionSimpleDTO();
+            featureCollection.setFeatures(featureSimpleDTOList);
     
-        return featureCollection;
-    }
+            return featureCollection;
+        }
     
     public FeatureCollectionDTO getCompleteField(){
         List<Object[]> results = fieldRepository.getAllCompleteField();
+        List<Object[]> imageResults = imageRepository.getAllImageView();
 
-        List<FeatureDTO> featureDTOList = results.stream().map(obj -> {
+        List<FieldFeatureDTO> completeField = results.stream().map(obj -> {
+            FarmDTO farm = new FarmDTO();
+            farm.setFarmName((String)obj[0]);
+            farm.setFarmCity((String)obj[1]);
+            farm.setFarmState((String)obj[2]);
+
             PropertiesDTO properties = new PropertiesDTO();
-            properties.setId((Long)obj[0]);
-            properties.setName((String)obj[5]);
-            properties.setFarm((String)obj[3]);
+            properties.setId((Long)obj[3]);
+            properties.setName((String)obj[4]);
             properties.setCulture((String)obj[5]);
+            properties.setArea((BigDecimal)obj[6]);
+            properties.setHarvest((String)obj[7]);
+            properties.setStatus((String)obj[8]);
+            properties.setFarm(farm);
+            properties.setSoil((String)obj[9]);
+            properties.setProductivity((Float)obj[10]);
 
             ClassificationDTO classification = new ClassificationDTO();
-            classification.setCoordinates((String) obj[11]);
-            classification.setArea((BigDecimal) obj[8]);
+            classification.setArea((BigDecimal)obj[11]);
+            classification.setCoordinates((String)obj[12]);
+            classification.setClassEntity((String)obj[13]);
 
             GeometryDTO geometry = new GeometryDTO();
-            geometry.setCoordinates((String) obj[11]);
+            geometry.setCoordinates((String)obj[14]);
 
-            FeatureDTO dto = new FeatureDTO();
-            dto.setProperties(properties);
-            dto.setClassification(classification);
-            dto.setGeometry(geometry);
+            List<ImageViewDTO> images = imageResults.stream().map(img->{
+                ImageViewDTO image = new ImageViewDTO();
+                image.setLink((String)obj[0]);
+                image.setName((String)obj[1]);
+                
+                return image;
+            }).collect(Collectors.toList());
 
-            return dto;
+            FieldFeatureDTO fieldFeatureDTO = new FieldFeatureDTO();
+            fieldFeatureDTO.setProperties(properties);
+            fieldFeatureDTO.setGeometry(geometry);
+            fieldFeatureDTO.setClassification(classification);
+            fieldFeatureDTO.setImages(images);
+
+            return fieldFeatureDTO;
         }).collect(Collectors.toList());
-
+    
         FeatureCollectionDTO featureCollection = new FeatureCollectionDTO();
-        featureCollection.setFeatures(featureDTOList);
+        featureCollection.setFeatures(completeField);
 
         return featureCollection;
     }

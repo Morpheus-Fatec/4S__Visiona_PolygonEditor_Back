@@ -7,5 +7,5 @@ import lombok.Data;
 @Data
 public class FeatureCollectionDTO {
     private String type = "FeatureCollection";
-    List<FeatureDTO> features;
+    List<FieldFeatureDTO> features;
 }
