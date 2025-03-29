@@ -13,5 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ImageCreateDTO {
     private List<MultipartFile> image;
+    private List<String> desc;
+    private List<String> name;
     private Long scanId;
 }
