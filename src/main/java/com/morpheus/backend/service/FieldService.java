@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
@@ -17,6 +16,9 @@ import com.morpheus.backend.DTO.GeoJsonView.FieldFeatureDTO;
 import com.morpheus.backend.DTO.GeoJsonView.GeometryDTO;
 import com.morpheus.backend.DTO.GeoJsonView.ImageViewDTO;
 import com.morpheus.backend.DTO.GeoJsonView.PropertiesDTO;
+import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationColletion;
+import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationFeature;
+import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationProperties;
 import com.morpheus.backend.entity.Classification;
 import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.entity.Farm;
@@ -163,12 +165,14 @@ public class FieldService {
         geometry.setCoordinates(field.getCoordinates());
 
 
-        List<ClassificationDTO> classificationDTOs = classifications.stream().map(classification -> {
-            ClassificationDTO classificationDTO = new ClassificationDTO();
-            classificationDTO.setId(classification.getId());
-            classificationDTO.setArea(classification.getArea());
-            classificationDTO.setCoordinates(classification.getOriginalCoordinates());
-            classificationDTO.setClassEntity(classification.getClassEntity().getName());
+        List<ClassificationFeature> classificationDTOs = classifications.stream().map(classification -> {
+            ClassificationFeature classificationDTO = new ClassificationFeature();
+            ClassificationProperties classificationProperties = new ClassificationProperties(classification.getId(), classification.getArea(), classification.getClassEntity().getName());
+            GeometryDTO classificationGeometry = new GeometryDTO();
+            classificationGeometry.setCoordinates(classification.getOriginalCoordinates());
+
+            classificationDTO.setProperties(classificationProperties);
+            classificationDTO.setGeometry(classificationGeometry);
             return classificationDTO;
         }).collect(Collectors.toList());
 
@@ -183,8 +187,12 @@ public class FieldService {
         FieldFeatureDTO fieldFeatureDTO = new FieldFeatureDTO();
         fieldFeatureDTO.setProperties(properties);
         fieldFeatureDTO.setGeometry(geometry);
-        fieldFeatureDTO.setClassification(classificationDTOs);
         fieldFeatureDTO.setImages(imageDTOs);
+
+        ClassificationColletion classificationCollection = new ClassificationColletion();
+        classificationCollection.setFeatures(classificationDTOs);
+        fieldFeatureDTO.setClassification(classificationCollection);
+        
 
         // Criando e retornando o FeatureCollectionDTO corretamente
         FeatureCollectionDTO featureCollection = new FeatureCollectionDTO();

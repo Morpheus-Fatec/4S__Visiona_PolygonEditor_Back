@@ -2,7 +2,7 @@ package com.morpheus.backend.DTO.GeoJsonView;
 
 import java.util.List;
 
-import com.morpheus.backend.DTO.ClassificationDTO;
+import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationColletion;
 
 import lombok.Data;
 
@@ -12,7 +12,7 @@ public class FieldFeatureDTO {
     private final String type = "Feature";
     private PropertiesDTO properties;
     private GeometryDTO geometry;
-    private List<ClassificationDTO> classification;
+    private ClassificationColletion classification;
     private List<ImageViewDTO> images;
 
 }
