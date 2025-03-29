@@ -15,6 +15,8 @@ public class PropertiesDTO {
     private BigDecimal area;
     private String harvest;
     private String status;
+    private String soil;
     private FarmDTO farm;
+    
 }
 

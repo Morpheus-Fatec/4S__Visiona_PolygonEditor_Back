@@ -85,45 +85,45 @@ public class FieldService {
         }
     }
     
-public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
-    List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO();
-
-    List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
-        // Criando o DTO da Fazenda
-        FarmDTO farmDTO = new FarmDTO();
-        farmDTO.setFarmName((String) obj[2]);  
-        farmDTO.setFarmCity((String) obj[8]);  
-        farmDTO.setFarmState((String) obj[9]);  
-
-        // Criando o DTO das propriedades
-        PropertiesDTO properties = new PropertiesDTO();
-        properties.setId(((Number) obj[0]).longValue());
-        properties.setName((String) obj[1]);  
-        properties.setFarm(farmDTO);
-        properties.setCulture((String) obj[3]);  
-        properties.setArea((BigDecimal) obj[6]);  
-        properties.setHarvest((String) obj[7]);  
-        properties.setStatus((String) obj[5]);
-
-        // Criando o DTO da geometria
-        GeometryDTO geometry = new GeometryDTO();
-        geometry.setCoordinates((String) obj[4]);
-
-        // Criando o DTO da Feature
-        FeatureSimpleDTO dto = new FeatureSimpleDTO();
-        dto.setProperties(properties);
-        dto.setGeometry(geometry);
-
-        return dto;
+    public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO(
+        String name, String soil, String status, String culture, String harvest, String farmName) {
+        
+        List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO(name, soil, status, culture, harvest, farmName);
+    
+        List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
+            // Criando o DTO da Fazenda
+            FarmDTO farmDTO = new FarmDTO();
+            farmDTO.setFarmName((String) obj[2]);  
+            farmDTO.setFarmCity((String) obj[8]);  
+            farmDTO.setFarmState((String) obj[9]);  
+    
+            // Criando o DTO das propriedades
+            PropertiesDTO properties = new PropertiesDTO();
+            properties.setId(((Number) obj[0]).longValue());
+            properties.setName((String) obj[1]);  
+            properties.setFarm(farmDTO);
+            properties.setCulture((String) obj[3]);  
+            properties.setArea((BigDecimal) obj[6]);  
+            properties.setHarvest((String) obj[7]);  
+            properties.setStatus((String) obj[5]);
+            properties.setSoil((String) obj[10]);
+    
+            // Criando o DTO da geometria
+            GeometryDTO geometry = new GeometryDTO();
+            geometry.setCoordinates((String) obj[4]);
+    
+            // Criando o DTO da Feature
+            FeatureSimpleDTO dto = new FeatureSimpleDTO();
+            dto.setProperties(properties);
+            dto.setGeometry(geometry);
+    
+            return dto;
         }).collect(Collectors.toList());
-
+    
         FeatureCollectionSimpleDTO featureCollection = new FeatureCollectionSimpleDTO();
         featureCollection.setFeatures(featureSimpleDTOList);
-
+    
         return featureCollection;
     }
-
-
-    
 
 }
