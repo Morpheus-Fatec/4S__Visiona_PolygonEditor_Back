@@ -2,6 +2,7 @@ package com.morpheus.backend.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.morpheus.backend.DTO.SoilDTO;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/soils")
+@CrossOrigin(origins = "http://localhost:5173")
 public class SoilController {
 
     @Autowired

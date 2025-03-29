@@ -9,10 +9,12 @@ import com.morpheus.backend.service.ImageService;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/image")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ImageController {
     @Autowired
     private ImageService imageService;

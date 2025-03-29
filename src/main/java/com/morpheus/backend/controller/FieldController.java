@@ -9,11 +9,13 @@ import com.morpheus.backend.service.FieldService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 
 
 @RestController
 @RequestMapping("/field")
+@CrossOrigin(origins = "http://localhost:5173")
 public class FieldController {
     @Autowired
     private FieldService fieldService;
