@@ -11,6 +11,7 @@ import com.morpheus.backend.service.FieldService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 
 @RestController
@@ -26,9 +27,9 @@ public class FieldController {
         return ResponseEntity.ok(featureCollectionSimpleDTO);
     }
 
-    @GetMapping("/featureCollection")
-    public ResponseEntity<FeatureCollectionDTO> getAllFeatureCollectionDTO() throws IllegalAccessError {
-        FeatureCollectionDTO featureCollectionDTO = fieldService.getCompleteField();
+    @GetMapping("/featureCollection/{id}")
+    public ResponseEntity<FeatureCollectionDTO> getAllFeatureCollectionDTOByID(@PathVariable Long id) throws IllegalAccessError {
+        FeatureCollectionDTO featureCollectionDTO = fieldService.getCompleteFieldById(id);
 
         return ResponseEntity.ok(featureCollectionDTO);
     }

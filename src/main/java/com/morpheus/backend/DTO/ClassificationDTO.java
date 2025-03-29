@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class ClassificationDTO {
 
+    private Long id;
     private BigDecimal area;
     private String coordinates;
     private String classEntity;

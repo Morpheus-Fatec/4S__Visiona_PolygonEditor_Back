@@ -9,10 +9,10 @@ import lombok.Data;
 @Data
 public class FieldFeatureDTO {
 
-    private final String type = "FeatureCollection";
+    private final String type = "Feature";
     private PropertiesDTO properties;
     private GeometryDTO geometry;
-    private ClassificationDTO classification;
+    private List<ClassificationDTO> classification;
     private List<ImageViewDTO> images;
 
 }

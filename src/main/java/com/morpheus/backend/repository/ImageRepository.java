@@ -14,11 +14,7 @@ import com.morpheus.backend.entity.Image;
 public interface ImageRepository extends JpaRepository<Image, Long> {
     Optional<Image> findById(Long id);
 
-    @Query(value = """
-        SELECT 
-            ia.nome AS nome_imagem,
-            ia.endereco AS url
-            FROM imagens_apoio ia;
-    """, nativeQuery = true)
-    List<Object[]> getAllImageView();
+    @Query("SELECT i FROM Image i WHERE i.scan.id = :scanID")
+    List<Image> getImagesByScanId(Long scanID);
+    
 }
