@@ -7,6 +7,4 @@ public class FeatureSimpleDTO {
     private final String type = "Feature";
     private PropertiesDTO properties;
     private GeometryDTO geometry;
-    
-
 }

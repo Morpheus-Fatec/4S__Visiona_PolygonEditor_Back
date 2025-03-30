@@ -26,7 +26,6 @@ public class ImageController {
     public List<Image> getAllImagesUrl() throws Exception {
         return imageService.getAllImages();
     }
-
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Image> saveImage(@ModelAttribute ImageCreateDTO image) {
         /*String profileImageUrl = userService.saveUser(userRequest);

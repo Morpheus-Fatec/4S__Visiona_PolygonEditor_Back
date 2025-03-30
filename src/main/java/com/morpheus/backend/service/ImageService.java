@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.morpheus.backend.DTO.ImageCreateDTO;
 import com.morpheus.backend.entity.Image;
 import com.morpheus.backend.entity.Scan;
+
 import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.exceptions.DefaultException;
 
