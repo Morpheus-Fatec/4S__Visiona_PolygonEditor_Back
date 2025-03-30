@@ -13,7 +13,7 @@ import com.morpheus.backend.entity.Image;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Long> {
-    Optional<Image> findById(Long id);[
+    Optional<Image> findById(Long id);
 
     @Query("SELECT i FROM Image i WHERE i.scan.id = :scanID")
     List<Image> getImagesByScanId(Long scanID);
