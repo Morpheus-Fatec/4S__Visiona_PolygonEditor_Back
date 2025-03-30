@@ -10,6 +10,6 @@ import lombok.Data;
 public class FieldGeoJsonDTO {
 
     private final String type = "FeatureCollection";
-    private List<FieldFeatureDTO> features;
 
+    private List<FieldFeatureDTO> features;
 }

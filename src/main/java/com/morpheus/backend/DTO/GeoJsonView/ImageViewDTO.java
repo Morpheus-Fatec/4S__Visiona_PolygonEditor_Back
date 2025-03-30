@@ -7,5 +7,4 @@ public class ImageViewDTO {
 
     private String link;
     private String name;
-
 }

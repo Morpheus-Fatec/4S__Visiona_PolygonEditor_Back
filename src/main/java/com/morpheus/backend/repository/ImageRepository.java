@@ -1,5 +1,6 @@
 package com.morpheus.backend.repository;
 
+
 import java.util.List;
 import java.util.Optional;
 
@@ -16,5 +17,4 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
 
     @Query("SELECT i FROM Image i WHERE i.scan.id = :scanID")
     List<Image> getImagesByScanId(Long scanID);
-    
 }
