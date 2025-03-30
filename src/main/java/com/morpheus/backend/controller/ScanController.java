@@ -31,7 +31,7 @@ public class ScanController {
 
 
     @PostMapping
-    public void createScan(@RequestBody ScanTestDTO scan) {
+    public Long createScan(@RequestBody ScanTestDTO scan) {
         
         Scan scanCreated = scanService.createScan(scan);
         
@@ -39,6 +39,8 @@ public class ScanController {
             Field fieldCreated = fieldService.createField(fieldDTO, scanCreated);   
             classificationService.createClassification(fieldCreated, fieldDTO.getClassification());
         }
+
+        return scanCreated.getId();
     }
 
     @GetMapping
