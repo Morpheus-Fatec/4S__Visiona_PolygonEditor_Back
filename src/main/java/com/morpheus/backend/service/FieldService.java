@@ -58,12 +58,12 @@ public class FieldService {
 
     public Field createField(CreateFieldDTO fieldDTO, Scan scan){ 
         try {
-            if (fieldDTO.getFarmname().isEmpty()){
+            if (fieldDTO.getNameFarm().isEmpty()){
                 throw new DefaultException("Farm não pode ser nulo.");
             }
 
             Farm farmField = new Farm();
-            farmField.setFarmName(fieldDTO.getFarmname());
+            farmField.setFarmName(fieldDTO.getNameFarm());
             Farm farm = farmRepository.save(farmField);
 
             Culture culture = cultureRepository.findByName(fieldDTO.getCulture())
@@ -85,7 +85,7 @@ public class FieldService {
             field.setHarvest(fieldDTO.getHarvest());
             field.setCulture(culture);
             field.setSoil(soil);
-            field.setName(fieldDTO.getName());
+            field.setName(fieldDTO.getNameField());
             field.setArea(fieldDTO.getArea());
             field.setProductivity(fieldDTO.getProductivity());
             field.setStatus(Status.fromPortuguese("Pendente"));

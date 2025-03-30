@@ -44,7 +44,7 @@ public class Field {
     @Column(name = "area", nullable = false, precision = 10, scale = 2)
     private BigDecimal area;
     
-    @Column(name = "produtividade", nullable = false)
+    @Column(name = "produtividade")
     private Float productivity;
 
     @Enumerated(EnumType.STRING)
