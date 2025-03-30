@@ -101,8 +101,10 @@ public class FieldService {
         }
     }
     
-    public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO() {
-        List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO();
+    public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO(
+        String name, String soil, String status, String culture, String harvest, String farmName) {
+        
+        List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO(name, soil, status, culture, harvest, farmName);
     
         List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
             // Criando o DTO da Fazenda
