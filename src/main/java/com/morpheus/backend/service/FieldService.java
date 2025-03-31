@@ -122,7 +122,7 @@ public class FieldService {
             properties.setArea((BigDecimal) obj[6]); 
             properties.setSoil((String) obj[10]); 
             properties.setHarvest((String) obj[7]); 
-            properties.setStatus((String) obj[5]);
+            properties.setStatus(Status.valueOf((String) obj[5]).getPortugueseValue());
     
             // Criando o DTO da geometria
             GeometryDTO geometry = new GeometryDTO();
