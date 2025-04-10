@@ -2,6 +2,8 @@ package com.morpheus.backend.entity;
 
 import java.math.BigDecimal;
 
+import org.locationtech.jts.geom.MultiPolygon;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,6 +53,6 @@ public class Field {
     @Column(name = "estado", nullable = false)
     private Status status;
 
-    @Column(name = "coordenadas", nullable = false, columnDefinition = "TEXT")
-    private String coordinates;
+    @Column(name = "coordenadas", nullable = false, columnDefinition = "geometry(MultiPolygon, 4326)")
+    private MultiPolygon coordinates;
 }
