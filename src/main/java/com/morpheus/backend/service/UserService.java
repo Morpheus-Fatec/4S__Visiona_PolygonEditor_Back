@@ -1,6 +1,7 @@
 package com.morpheus.backend.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,20 @@ public class UserService {
 
     public String createUser(UserDto userDto){
         try {
-            if (userDto.getEmail().isEmpty() || userDto.getPassword().isEmpty()) {
-                throw new Exception();
-                
+            if (userDto.getEmail().trim().isEmpty()) {
+                throw new DefaultException("O e-mail é obrigatório.");
+            }
+            
+            if (userDto.getPassword().trim().isEmpty()) {
+                throw new DefaultException("A senha é obrigatória.");
+            }
+            
+            if (userDto.getName().trim().isEmpty() || userDto.getName() == null) {
+                throw new DefaultException("O nome é obrigatório.");
+            }
+
+            if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+                throw new DefaultException("Já existe um usuário com esse e-mail cadastrado");
             }
 
             int rolesSelected = 0;
@@ -29,10 +41,11 @@ public class UserService {
             if (Boolean.TRUE.equals(userDto.getIsAnalyst())) rolesSelected++;
 
             if (rolesSelected != 1) {
-                throw new Exception("Você deve selecionar exatamente um tipo de usuário (Admin, Consultant ou Analyst).");
+                throw new DefaultException("Você deve selecionar exatamente um tipo de usuário (Admin, Consultant ou Analyst).");
             }
 
             User user = new User();
+            user.setName(userDto.getName());
             user.setEmail(userDto.getEmail());
             user.setIsAdmin(userDto.getIsAdmin());
             user.setIsAnalyst(userDto.getIsConsultant());
@@ -42,11 +55,9 @@ public class UserService {
 
             return "Usuário Criado Com Sucesso!";   
 
-        } catch (Exception e) {
-            throw new DefaultException("Verifique se foi preenchido todos os campos corretamente.");
-            
+        }  catch (DefaultException e) {
+            throw e;
         }
-
     }
 
     public List<User> getAllUsers(){
@@ -69,26 +80,42 @@ public class UserService {
     public String updateUser(Long userId, UserDto userDto) {
         try {
             User user = userRepository.getUserById(userId);
+            Optional<User> existingUserOptional = userRepository.findByEmail(userDto.getEmail());
     
             if (user == null) {
-                throw new Exception("Usuário não encontrado.");
+                throw new DefaultException("Usuário não encontrado.");
             }
     
-            if (userDto.getEmail() == null || userDto.getEmail().isEmpty()
-                    || userDto.getPassword() == null || userDto.getPassword().isEmpty()) {
-                throw new Exception("Email e senha são obrigatórios.");
+            if (userDto.getEmail().trim().isEmpty()) {
+                throw new DefaultException("O e-mail é obrigatório.");
             }
-    
+            
+            if (userDto.getPassword().trim().isEmpty()) {
+                throw new DefaultException("A senha é obrigatória.");
+            }
+            
+            if (userDto.getName().trim().isEmpty()) {
+                throw new DefaultException("O nome é obrigatório.");
+            }
 
+            if (existingUserOptional.isPresent()) {
+                User existingUser = existingUserOptional.get();
+            
+                if (!existingUser.getId().equals(userId)) {
+                    throw new DefaultException("Já existe um usuário com esse e-mail cadastrado.");
+                }
+            }
+    
             int rolesSelected = 0;
             if (Boolean.TRUE.equals(userDto.getIsAdmin())) rolesSelected++;
             if (Boolean.TRUE.equals(userDto.getIsConsultant())) rolesSelected++;
             if (Boolean.TRUE.equals(userDto.getIsAnalyst())) rolesSelected++;
     
             if (rolesSelected != 1) {
-                throw new Exception("Você deve selecionar exatamente um tipo de usuário (Admin, Consultant ou Analyst).");
+                throw new DefaultException("Você deve selecionar exatamente um tipo de usuário (Admin, Consultant ou Analyst).");
             }
-    
+            
+            user.setName(userDto.getName());
             user.setEmail(userDto.getEmail());
             user.setPassword(userDto.getPassword());
             user.setIsAdmin(Boolean.TRUE.equals(userDto.getIsAdmin()));
@@ -98,9 +125,10 @@ public class UserService {
             userRepository.save(user);
     
             return "Usuário atualizado com sucesso.";
-        } catch (Exception e) {
-            return "Erro ao atualizar usuário: " + e.getMessage();
+        } catch (DefaultException e) {
+            throw e;
         }
+
     }
 
     public String deleteUserById(Long id){

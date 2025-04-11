@@ -12,9 +12,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserDto {
     
+    private String name;
     private String email;
     private String password;
-
+    
     @Schema(defaultValue = "false")
     private Boolean isAdmin = false;
 
