@@ -31,7 +31,7 @@ public class FieldController {
         @RequestParam(required = false) String farmName
     ) {
         FeatureCollectionSimpleDTO featureCollection = fieldService.getAllFeatureCollectionSimpleDTO(
-            name, soil, status, culture, harvest, farmName
+            name, soil, status, culture, harvest, farmName  
         );
         return ResponseEntity.ok(featureCollection);
     }
