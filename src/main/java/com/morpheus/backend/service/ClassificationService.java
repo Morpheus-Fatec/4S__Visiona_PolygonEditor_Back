@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.entity.Field;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.entity.ClassEntity;
 import com.morpheus.backend.entity.Classification;
@@ -29,7 +30,7 @@ public class ClassificationService {
     private ClassEntityRepository classEntityRepository;
 
     @Transactional
-    public void createClassification(Field field, List<ClassificationDTO> classificationDTOs) {
+    public void createClassification(Field field, List<ClassificationDTO> classificationDTOs) throws JsonProcessingException {
         List<Classification> classifications = new ArrayList<>();
         Map<String, ClassEntity> classEntityCache = new HashMap<>();
         Set<String> classEntityNames = classificationDTOs.stream()
@@ -59,12 +60,11 @@ public class ClassificationService {
             Classification classificationEntity = new Classification();
             classificationEntity.setField(field);
             classificationEntity.setArea(classificationDTO.getArea());
-            classificationEntity.setOriginalCoordinates(classificationDTO.getCoordinates());
+            classificationEntity.setOriginalCoordinates(classificationDTO.convertStringToMultiPolygon());
             classificationEntity.setClassEntity(classEntityCache.get(classificationDTO.getClassEntity()));
             classifications.add(classificationEntity);
         }
 
         classificationRepository.saveAll(classifications);
     }
-
 }

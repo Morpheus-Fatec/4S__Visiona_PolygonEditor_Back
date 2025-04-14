@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 @RestController
 @RequestMapping("/field")
 public class FieldController {
@@ -31,7 +30,7 @@ public class FieldController {
         @RequestParam(required = false) String farmName
     ) {
         FeatureCollectionSimpleDTO featureCollection = fieldService.getAllFeatureCollectionSimpleDTO(
-            name, soil, status, culture, harvest, farmName
+            name, soil, status, culture, harvest, farmName  
         );
         return ResponseEntity.ok(featureCollection);
     }
@@ -42,6 +41,4 @@ public class FieldController {
 
         return ResponseEntity.ok(featureCollectionDTO);
     }
-    
-   
 }

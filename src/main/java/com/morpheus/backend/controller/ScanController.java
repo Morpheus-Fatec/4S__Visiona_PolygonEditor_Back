@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.ScanTestDTO;
 import com.morpheus.backend.entity.Scan;
@@ -31,12 +32,12 @@ public class ScanController {
 
 
     @PostMapping
-    public Long createScan(@RequestBody ScanTestDTO scan) {
+    public Long createScan(@RequestBody ScanTestDTO scan) throws JsonProcessingException {
         
         Scan scanCreated = scanService.createScan(scan);
         
         for (CreateFieldDTO fieldDTO : scan.getFields()) {
-            Field fieldCreated = fieldService.createField(fieldDTO, scanCreated);   
+            Field fieldCreated = fieldService.createField(fieldDTO, scanCreated);
             classificationService.createClassification(fieldCreated, fieldDTO.getClassification());
         }
 
