@@ -3,7 +3,6 @@ package com.morpheus.backend.DTO;
 import java.math.BigDecimal;
 
 import org.locationtech.jts.geom.MultiPolygon;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.utilities.Converter;
@@ -14,8 +13,7 @@ import lombok.Data;
 @Data
 public class ClassificationDTO implements Converter {
 
-    @Autowired
-    private GeoJsonToJTSConverter geoJsonToJTSConverter;
+    private static GeoJsonToJTSConverter geoJsonToJTSConverter = new GeoJsonToJTSConverter();;
 
     private Long id;
     private BigDecimal area;
