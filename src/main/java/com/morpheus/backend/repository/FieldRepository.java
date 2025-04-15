@@ -1,8 +1,9 @@
 package com.morpheus.backend.repository;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -58,14 +59,29 @@ public interface FieldRepository extends JpaRepository<Field, Long>{
             (COALESCE(:culture, '') = '' OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :culture, '%'))) AND
             (COALESCE(:harvest, '') = '' OR LOWER(t.safra) LIKE LOWER(CONCAT('%', :harvest, '%'))) AND
             (COALESCE(:farmName, '') = '' OR LOWER(fa.nome) LIKE LOWER(CONCAT('%', :farmName, '%')))
-        """, nativeQuery = true)
-    List<Object[]> getAllFeatureSimpleDTO(
+        """, countQuery = """
+                 SELECT 
+            COUNT(*)
+        FROM Talhoes t
+        JOIN Fazendas fa ON t.id_fazenda = fa.id_fazenda
+        LEFT JOIN Culturas c ON t.id_cultura = c.id_cultura
+        LEFT JOIN Solos so ON t.id_solo = so.id_solo
+        WHERE
+            (COALESCE(:nome, '') = '' OR LOWER(t.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) AND
+            (COALESCE(:soil, '') = '' OR LOWER(so.nome) LIKE LOWER(CONCAT('%', :soil, '%'))) AND
+            (COALESCE(:status, '') = '' OR LOWER(t.estado) LIKE LOWER(CONCAT('%', :status, '%'))) AND
+            (COALESCE(:culture, '') = '' OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :culture, '%'))) AND
+            (COALESCE(:harvest, '') = '' OR LOWER(t.safra) LIKE LOWER(CONCAT('%', :harvest, '%'))) AND
+            (COALESCE(:farmName, '') = '' OR LOWER(fa.nome) LIKE LOWER(CONCAT('%', :farmName, '%')))
+                """, nativeQuery = true)
+    Page<FieldDTO> getAllFeatureSimpleDTO(
         @Param("nome") String name,
         @Param("soil") String soil,
         @Param("status") String status,
         @Param("culture") String culture,
         @Param("harvest") String harvest,
-        @Param("farmName") String farmName
+        @Param("farmName") String farmNam,
+        Pageable pageable
     );
     
 }
