@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,6 +15,7 @@ import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.FieldDTO;
+import com.morpheus.backend.DTO.PaginatedFieldResponse;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
@@ -103,33 +107,33 @@ public class FieldService {
         }
     }
 
-    public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO(
-        String name, String soil, String status, String culture, String harvest, String farmName) {
-        
-        List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO(name, soil, status, culture, harvest, farmName);
+    public PaginatedFieldResponse<FeatureSimpleDTO> getAllFeatureCollectionSimpleDTO(
+        String name, String soil, String status, String culture, String harvest, String farmName, int page, int itens) {
+        PageRequest pageable = PageRequest.of(page -1,itens,Sort.by(Sort.Direction.ASC, "id_talhao"));
+        Page<FieldDTO> results = fieldRepository.getAllFeatureSimpleDTO(name, soil, status, culture, harvest, farmName, pageable);
     
         List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
             // Criando o DTO da Fazenda
             FarmDTO farmDTO = new FarmDTO();
-            farmDTO.setFarmName((String) obj[2]);
-            farmDTO.setFarmCity((String) obj[8]);
-            farmDTO.setFarmState((String) obj[9]);
+            farmDTO.setFarmName((String) obj.getFarm().getFarmName());
+            farmDTO.setFarmCity((String) obj.getFarm().getFarmCity());
+            farmDTO.setFarmState((String) obj.getFarm().getFarmState());
     
             // Criando o DTO das propriedades
             PropertiesDTO properties = new PropertiesDTO();
-            properties.setId(((Number) obj[0]).longValue());
-            properties.setName((String) obj[1]);
+            properties.setId((Long) ((Number) obj.getId()));
+            properties.setName((String) obj.getName());
             properties.setFarm(farmDTO);
-            properties.setCulture((String) obj[3]);
-            properties.setArea((BigDecimal) obj[6]);
-            properties.setSoil((String) obj[10]);
-            properties.setHarvest((String) obj[7]);
-            properties.setStatus(Status.valueOf((String) obj[5]).getPortugueseValue());
+            properties.setCulture((String) obj.getCulture());
+            properties.setArea((BigDecimal) obj.getArea());
+            properties.setSoil((String) obj.getSoil());
+            properties.setHarvest((String) obj.getHarvest());
+            properties.setStatus((String) obj.getStatus());
     
             // Criando o DTO da geometria
             GeometryDTO geometry = new GeometryDTO();
             try {
-                geometry.convertToGeoJson((String) obj[4]);
+                geometry.convertToGeoJson((String) obj.getCoordinates().toString());
             } catch (JsonProcessingException e) {
 
                 e.printStackTrace();
@@ -146,7 +150,11 @@ public class FieldService {
             FeatureCollectionSimpleDTO featureCollection = new FeatureCollectionSimpleDTO();
             featureCollection.setFeatures(featureSimpleDTOList);
     
-            return featureCollection;
+            return new PaginatedFieldResponse<FeatureSimpleDTO>(
+                featureSimpleDTOList,
+                results.getTotalPages(),
+                results.getTotalElements()
+            );
         }
     
     public FeatureCollectionDTO getCompleteFieldById(Long idField) {
