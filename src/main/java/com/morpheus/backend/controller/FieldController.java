@@ -31,7 +31,7 @@ public class FieldController {
         @RequestParam(required = false) String harvest,
         @RequestParam(required = false) String farmName,
         @RequestParam (defaultValue = "1")int page, 
-        @RequestParam(defaultValue = "50") int itens
+        @RequestParam(defaultValue = "20") int itens
     ) {
 
         PaginatedFieldResponse<FeatureSimpleDTO> fields = fieldService.getAllFeatureCollectionSimpleDTO(name, soil, status, culture,  harvest, farmName, page, itens);
