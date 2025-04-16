@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.locationtech.jts.geom.MultiPolygon;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.utilities.Converter;
@@ -21,8 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CreateFieldDTO implements Converter {
 
-    @Autowired
-    private GeoJsonToJTSConverter geoJsonToJTSConverter;
+    private static GeoJsonToJTSConverter geoJsonToJTSConverter = new GeoJsonToJTSConverter();
 
     private BigDecimal area;
     private String coordinates;
