@@ -19,16 +19,27 @@ public class FieldDTO {
     private String status;
     private String coordinates;
 
-        public FieldDTO(Long id, Long scanningId, String name, String harvest, BigDecimal area, String productivity, String status, String culture, String farmName, String farmState, String FarmCity, String coordinates) {
+    public FieldDTO(
+        Long id,
+        String name,
+        String farmName,
+        String culture,
+        String coordinates,
+        String status,
+        BigDecimal area,
+        String harvest,
+        String farmCity,
+        String farmState,
+        String soil
+    ) {
         this.id = id;
-        this.scanningId = scanningId;
         this.name = name;
         this.harvest = harvest;
         this.area = area;
-        this.productivity = productivity;
+        this.soil = soil;
         this.status = status;
         this.culture = culture;
-        this.farm = new FarmDTO(farmName, farmState, FarmCity);
-        this.coordinates= coordinates;
+        this.farm = new FarmDTO(farmName, farmState, farmCity);
+        this.coordinates = coordinates;
     }
 }

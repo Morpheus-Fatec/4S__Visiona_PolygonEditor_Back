@@ -15,23 +15,23 @@ import com.morpheus.backend.entity.Field;
 @Repository
 public interface FieldRepository extends JpaRepository<Field, Long>{
     @Query(value = """
-    SELECT
-        f.id_talhao AS id,
-        f.id_leitura AS scanningId,
-        f.nome AS name,
-        f.safra AS harvest,
-        f.area AS area,
-        f.produtividade AS productivity,
-        f.estado AS status,
-        c.nome AS culture,
+    SELECT 
+        t.id_talhao AS id,
+        t.nome AS nome,
         fa.nome AS farmName,
-        fa.estado AS farmState,
-        fa.cidade AS farmCity,
-        ST_AsGeoJSON(f.coordenadas) AS coordinates
-    FROM talhoes f
-    LEFT JOIN culturas c ON f.id_cultura = c.id_cultura
-    JOIN fazendas fa ON f.id_fazenda = fa.id_fazenda
-    WHERE f.id_talhao = :fieldId
+        c.nome AS culture,
+        ST_AsGeoJSON(t.coordenadas) AS coordinates,
+        t.estado AS status,
+        t.area AS area,
+        t.safra AS harvest,
+        fa.cidade as farmCity,
+        fa.estado as farmState,
+        so.nome as soil
+    FROM Talhoes t
+    JOIN Fazendas fa ON t.id_fazenda = fa.id_fazenda
+    LEFT JOIN Culturas c ON t.id_cultura = c.id_cultura
+    LEFT JOIN Solos so ON t.id_solo = so.id_solo
+    WHERE t.id_talhao = :fieldId
     """, nativeQuery = true)
     Optional<FieldDTO> getFieldById(@Param("fieldId") Long fieldId);
 
