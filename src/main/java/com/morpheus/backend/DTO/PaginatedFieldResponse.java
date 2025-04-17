@@ -12,8 +12,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PaginatedFieldResponse<T> {
-    private List<T> field;
+    private List<T> features;
     private int totalPages;
-    private long totalElements;
+    private long totalItems;
 
 }
