@@ -128,7 +128,8 @@ public class FieldService {
             properties.setArea((BigDecimal) obj.getArea());
             properties.setSoil((String) obj.getSoil());
             properties.setHarvest((String) obj.getHarvest());
-            properties.setStatus((String) obj.getStatus());
+            Status statusProp = Status.valueOf(((String) obj.getStatus()).toUpperCase()); 
+            properties.setStatus(statusProp.getPortugueseValue());
     
             // Criando o DTO da geometria
             GeometryDTO geometry = new GeometryDTO();
@@ -171,7 +172,8 @@ public class FieldService {
         properties.setArea(field.getArea());
         properties.setCulture(field.getCulture());
         properties.setHarvest(field.getHarvest());
-        properties.setStatus(field.getStatus());
+        Status statusProp = Status.valueOf(((String) field.getStatus()).toUpperCase()); 
+        properties.setStatus(statusProp.getPortugueseValue());
         properties.setSoil(field.getSoil());
         properties.setFarm(farmDTO);
 
