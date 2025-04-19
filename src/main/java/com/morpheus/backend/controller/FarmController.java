@@ -31,7 +31,7 @@ public class FarmController {
         return farmService.getFarmById(id);
     }
 
-    @PostMapping
+    @PostMapping("/createFarm")
     public String createFarm(@RequestBody FarmDTO farmDTO) throws Exception{
         return farmService.createFarm(farmDTO);
     }
