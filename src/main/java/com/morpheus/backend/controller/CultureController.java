@@ -33,7 +33,7 @@ public class CultureController {
         return cultureService.getCultureById(id);
     }
 
-    @PostMapping
+    @PostMapping("/createCulture")
     public String createCulture(@RequestBody CultureDTO culture) {
         return cultureService.createCulture(culture.getName());
     }
