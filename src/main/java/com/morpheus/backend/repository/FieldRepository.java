@@ -70,4 +70,5 @@ public interface FieldRepository extends JpaRepository<Field, Long>{
 
     boolean existsByFarm_FarmName(String farmName);
     boolean existsByCulture_Name(String cultureName);
+    boolean existsBySoil_Name(String soilName);
 }
