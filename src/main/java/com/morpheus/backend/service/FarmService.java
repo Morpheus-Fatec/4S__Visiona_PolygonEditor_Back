@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.entity.Farm;
 import com.morpheus.backend.repository.FarmRepository;
+import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.exceptions.DefaultException;
 
 @Service
 public class FarmService {
     private FarmRepository farmRepository;
+    private FieldRepository fieldRepository;
 
     public FarmService(FarmRepository farmRepository){
         this.farmRepository = farmRepository;
@@ -118,7 +120,6 @@ public class FarmService {
         }
     }
 
-
     public String updateFarmCity(Long farmId, String newCity) {
         try {
             Farm farm = farmRepository.getFarmById(farmId);
@@ -147,7 +148,6 @@ public class FarmService {
         }
     }
 
-
     public String updateFarmState(Long farmId, String newState) {
         try {
             Farm farm = farmRepository.getFarmById(farmId);
@@ -175,23 +175,25 @@ public class FarmService {
         }
     }
 
-
     public String deleteFarmById(Long id) {
-        String deletedFarm = "";
-
         try {
             Farm farm = farmRepository.getFarmById(id);
-
-            if(farm == null){
-                throw new Exception();
+            if (farm == null) {
+                throw new DefaultException("Não existe fazenda com o id " + id);
             }
-
-            deletedFarm = farm.getFarmName();
+            
+            if (fieldRepository.existsByFarmName(farm.getFarmName())) {
+                throw new DefaultException("A fazenda está relacionada a um ou mais talhões e não pode ser excluída.");
+            }
+            
+            String deletedFarm = farm.getFarmName();
             farmRepository.deleteById(id);
             
-            return deletedFarm+" foi deletada com sucesso!";
+            return deletedFarm + " foi deletada com sucesso!";
+        } catch (DefaultException e) {
+            throw e;
         } catch (Exception e) {
-            throw new DefaultException("Não existe fazenda com o id "+id);
+            throw new DefaultException("Erro ao excluir a fazenda com o id " + id + ": " + e.getMessage());
         }
     }
 }
