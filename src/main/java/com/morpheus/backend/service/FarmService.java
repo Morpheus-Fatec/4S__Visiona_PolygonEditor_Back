@@ -17,38 +17,15 @@ public class FarmService {
         this.farmRepository = farmRepository;
     }
 
-    public String createFarm(FarmDTO farmDTO){
-        
-        try {
-            Farm farm = new Farm();
-
-            if(farmDTO.getFarmName() == null || farmDTO.getFarmState() == null || farmDTO.getFarmCity() == null){
-                throw new Exception();
-            }
-
-            farm.setFarmName(farmDTO.getFarmName());
-            farm.setFarmState(farmDTO.getFarmState());
-            farm.setFarmCity(farmDTO.getFarmCity());
-    
-            farmRepository.save(farm);
-
-            return "Fazenda " + farm.getFarmName() + " criado com sucesso.";
-        } catch (Exception e) {
-            throw new DefaultException("Não foi possível criar");
-        }
-    }
-    
-
     public List<Farm> getAllFarms(){
-        List<Farm> farmList =  farmRepository.findAll();
-
         try {
+            List<Farm> farmList =  farmRepository.findAll();
+        
             if (farmList.size() == 0){
                 throw new Exception();
             }
-
             return farmList;
-
+        
         } catch (Exception e) {
             throw new DefaultException("Não há nenhuma fazenda cadastrada.");
         }
@@ -65,6 +42,23 @@ public class FarmService {
             return farmRepository.findById(id).orElse(null);
         } catch (Exception e) {
             throw new DefaultException("Não existe a fazenda com o id " + id);
+        }
+    }
+
+    public String createFarm(FarmDTO farmDTO){
+        
+        try {
+            Farm farm = new Farm();
+            if(farmDTO.getFarmName() == null || farmDTO.getFarmState() == null || farmDTO.getFarmCity() == null){
+                throw new Exception();
+            }
+            farm.setFarmName(farmDTO.getFarmName());
+            farm.setFarmState(farmDTO.getFarmState());
+            farm.setFarmCity(farmDTO.getFarmCity());
+            farmRepository.save(farm);
+            return "Fazenda " + farm.getFarmName() + " criado com sucesso.";
+        } catch (Exception e) {
+            throw new DefaultException("Não foi possível criar");
         }
     }
 
