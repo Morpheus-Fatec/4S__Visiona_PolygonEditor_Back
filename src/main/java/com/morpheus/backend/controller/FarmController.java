@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,18 +17,23 @@ import com.morpheus.backend.service.FarmService;
 @RestController
 @RequestMapping("/farm")
 public class FarmController {
+
     @Autowired
     private FarmService farmService;
-
-
-    @PostMapping
-    public String createFarm(@RequestBody FarmDTO farmDTO) throws Exception{
-        return farmService.createFarm(farmDTO);
-    }
 
     @GetMapping
     public List<Farm> getAllFarms() throws Exception{
         return farmService.getAllFarms();
+    }
+
+    @GetMapping("/{id}")
+    public Farm getFarmById(@PathVariable Long id) throws Exception {
+        return farmService.getFarmById(id);
+    }
+
+    @PostMapping
+    public String createFarm(@RequestBody FarmDTO farmDTO) throws Exception{
+        return farmService.createFarm(farmDTO);
     }
 
 }
