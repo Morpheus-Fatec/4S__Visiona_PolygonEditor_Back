@@ -46,19 +46,19 @@ public class FarmService {
     }
 
     public String createFarm(FarmDTO farmDTO){
-        
         try {
-            Farm farm = new Farm();
             if(farmDTO.getFarmName() == null || farmDTO.getFarmState() == null || farmDTO.getFarmCity() == null){
                 throw new Exception();
             }
+
+            Farm farm = new Farm();
             farm.setFarmName(farmDTO.getFarmName());
             farm.setFarmState(farmDTO.getFarmState());
             farm.setFarmCity(farmDTO.getFarmCity());
             farmRepository.save(farm);
             return "Fazenda " + farm.getFarmName() + " criado com sucesso.";
         } catch (Exception e) {
-            throw new DefaultException("Não foi possível criar");
+            throw new DefaultException("Não foi possível criar a fazenda");
         }
     }
 
