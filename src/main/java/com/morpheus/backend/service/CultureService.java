@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.repository.CultureRepository;
+import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.exceptions.DefaultException;
 
 @Service
@@ -14,6 +15,10 @@ public class CultureService {
 
     @Autowired
     CultureRepository cultureRepository;
+
+    @Autowired
+    FieldRepository fieldRepository;
+
 
     public List<Culture> getAllCultures(){
         try {
@@ -90,10 +95,19 @@ public class CultureService {
 
     public String deleteCulture(Long id){
         try {
+            if(id == null){
+                throw new Exception();
+            }
+            
             Culture culture = cultureRepository.getCultureById(id);
+            
             if(culture == null){
                 throw new Exception();
             }
+            if (fieldRepository.existsByCulture_Name(culture.getName())) {
+                throw new DefaultException("Não é possível deletar a cultura, pois ela está associada a um talhão.");
+            }
+            
             cultureRepository.delete(culture);
             return "Cultura de " + culture.getName() + " deletada com sucesso.";
         } catch (DefaultException e) {
