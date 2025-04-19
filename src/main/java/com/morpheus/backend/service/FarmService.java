@@ -92,63 +92,89 @@ public class FarmService {
         }
     }
 
-
-    public String updateFarmName(Long farmId, FarmDTO newName) {
-        String oldFarmName = "";
-
+    public String updateFarmName(Long id, String newName) {
         try {
-            Farm farm = farmRepository.getFarmById(farmId);
-
-            if (farm == null || newName.getFarmName().equals("")){
-                throw new Exception();
+            Farm farm = farmRepository.getFarmById(id);
+            if (farm == null) {
+                throw new DefaultException("Fazenda com o ID " + id + " não encontrada.");
             }
-            oldFarmName = farm.getFarmName();
-            farm.setFarmName(newName.getFarmName());
+            if (newName == null || newName.isEmpty()) {
+                throw new DefaultException("O novo nome da fazenda não pode estar vazio.");
+            }
+    
+            String oldFarmName = farm.getFarmName();
+    
+            farm.setFarmName(newName);
             farmRepository.save(farm);
-
-            return "Nome da Fazenda alterada de " + oldFarmName + " para: "+farm.getFarmName().toString(); 
+    
+            return String.format(
+                "Nome da fazenda alterado com sucesso: De '" + oldFarmName+ "' para '"  + farm.getFarmName() + "'.",
+                oldFarmName, farm.getFarmName()
+            );
+        } catch (DefaultException e) {
+            throw e;
         } catch (Exception e) {
-            throw new DefaultException("Não foi possível alterar o nome da fazenda.");
+            throw new DefaultException("Erro ao alterar o nome da fazenda: " + e.getMessage());
         }
     }
 
-    public String updateFarmState(Long farmId, FarmDTO newState) {
-        String oldFarmState = "";
 
+    public String updateFarmCity(Long farmId, String newCity) {
         try {
             Farm farm = farmRepository.getFarmById(farmId);
-
-            if (farm == null){
-                throw new Exception();
+    
+            if (farm == null) {
+                throw new DefaultException("Fazenda com o ID " + farmId + " não encontrada.");
             }
-            oldFarmState = farm.getFarmState();
-            farm.setFarmState(newState.getFarmState());
+    
+            if (newCity == null || newCity.isEmpty()) {
+                throw new DefaultException("A nova cidade da fazenda não pode estar vazia.");
+            }
+    
+            String oldFarmCity = farm.getFarmCity();
+    
+            farm.setFarmCity(newCity);
             farmRepository.save(farm);
-
-            return "Estado da Fazenda alterada de " + oldFarmState + " para: "+farm.getFarmState().toString(); 
+    
+            return String.format(
+                "Cidade da fazenda '" + farm.getFarmName() + "' alterada com sucesso: De '" + oldFarmCity + "' para '" + farm.getFarmCity() + "'.",
+                oldFarmCity, farm.getFarmCity()
+            );
+        } catch (DefaultException e) {
+            throw e;
         } catch (Exception e) {
-            throw new DefaultException("Não foi possível alterar o nome da fazenda.");
+            throw new DefaultException("Erro ao alterar a cidade da fazenda: " + e.getMessage());
         }
     }
 
-    public String updateFarmCity(Long farmId, FarmDTO newCity) {
-        String oldFarmCity = "";
 
+    public String updateFarmState(Long farmId, String newState) {
         try {
             Farm farm = farmRepository.getFarmById(farmId);
-
-            if (farm == null || newCity.getFarmCity().equals("")){
-                throw new Exception();
+    
+            if (farm == null) {
+                throw new DefaultException("Fazenda com o ID " + farmId + " não encontrada.");
             }
-            oldFarmCity = farm.getFarmCity();
-            farm.setFarmCity(newCity.getFarmCity());
+    
+            if (newState == null || newState.isEmpty()) {
+                throw new DefaultException("O novo estado da fazenda não pode estar vazio.");
+            }
+    
+            String oldFarmState = farm.getFarmState();
+    
+            farm.setFarmState(newState);
             farmRepository.save(farm);
-
-            return "Cidade da Fazenda alterada de " + oldFarmCity + " para: "+farm.getFarmCity().toString(); 
+    
+            return String.format(
+                "Estado da fazenda '" + farm.getFarmName() + "' alterado com sucesso: De '" + oldFarmState + "' para '" + farm.getFarmState() + "'."
+            );
+        } catch (DefaultException e) {
+            throw e;
         } catch (Exception e) {
-            throw new DefaultException("Não foi possível alterar o nome da fazenda.");
+            throw new DefaultException("Erro ao alterar o estado da fazenda: " + e.getMessage());
         }
     }
+
 
     public String deleteFarmById(Long id) {
         String deletedFarm = "";
