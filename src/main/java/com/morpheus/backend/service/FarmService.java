@@ -63,35 +63,35 @@ public class FarmService {
     }
 
     public String updateFarm(Long farmId, FarmDTO farmDTO) {
-        String oldFarmName = "";
-        String oldFarmState = "";
-        String oldFarmCity = "";
-
         try {
             Farm farm = farmRepository.getFarmById(farmId);
-
             if (farm == null) {
-                throw new Exception();
+                throw new DefaultException("Fazenda com o ID " + farmId + " não encontrada.");
             }
-
-            if(farmDTO.getFarmName().equals("") || farmDTO.getFarmState().equals("") || farmDTO.getFarmCity().equals("")){
-                throw new DefaultException("Existem campos vazios.");
+            if (farmDTO.getFarmName() == null || farmDTO.getFarmState() == null || farmDTO.getFarmCity() == null) {
+                throw new DefaultException("Fazenda não pode ser atualizada com valores nulos.");
             }
-
-            oldFarmName = farm.getFarmName();
-            oldFarmState = farm.getFarmState();
-            oldFarmCity = farm.getFarmCity();
+            String oldFarmName = farm.getFarmName();
+            String oldFarmState = farm.getFarmState();
+            String oldFarmCity = farm.getFarmCity();
 
             farm.setFarmName(farmDTO.getFarmName());
             farm.setFarmState(farmDTO.getFarmState());
             farm.setFarmCity(farmDTO.getFarmCity());
             farmRepository.save(farm);
 
-            return "Fazenda alterada de " + oldFarmName + ", " + oldFarmState + ", " + oldFarmCity + " para: "+farm.getFarmName().toString() + ", " + farm.getFarmState().toString() + ", " + farm.getFarmCity().toString(); 
+            return String.format(
+                "Fazenda alterada de Nome: %s, Estado: %s, Cidade: %s para Nome: %s, Estado: %s, Cidade: %s",
+                oldFarmName, oldFarmState, oldFarmCity,
+                farm.getFarmName(), farm.getFarmState(), farm.getFarmCity()
+            );
+        } catch (DefaultException e) {
+            throw e;
         } catch (Exception e) {
-            throw new DefaultException("Não foi possível alterar a fazenda.");
+            throw new DefaultException("Erro ao atualizar a fazenda: " + e.getMessage());
         }
     }
+
 
     public String updateFarmName(Long farmId, FarmDTO newName) {
         String oldFarmName = "";
