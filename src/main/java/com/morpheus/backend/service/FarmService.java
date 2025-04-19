@@ -182,7 +182,7 @@ public class FarmService {
                 throw new DefaultException("Não existe fazenda com o id " + id);
             }
             
-            if (fieldRepository.existsByFarmName(farm.getFarmName())) {
+            if (fieldRepository.existsByFarm_FarmName(farm.getFarmName())) {
                 throw new DefaultException("A fazenda está relacionada a um ou mais talhões e não pode ser excluída.");
             }
             
