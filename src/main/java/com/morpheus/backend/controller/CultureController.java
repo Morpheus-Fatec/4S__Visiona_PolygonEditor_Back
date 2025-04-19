@@ -22,14 +22,19 @@ public class CultureController {
     @Autowired
     private CultureService cultureService;
     
-    @PostMapping
-    public String createCulture(@RequestBody CultureDTO cultureName) {
-        return cultureService.createCulture(cultureName);
-    }
-
     @GetMapping
     public List<Culture> getAllCultures() {
         return cultureService.getAllCultures();
+    }
+
+    @GetMapping("/{id}")
+    public Culture getCultureById(@RequestBody Long id) {
+        return cultureService.getCultureById(id);
+    }
+
+    @PostMapping
+    public String createCulture(@RequestBody CultureDTO cultureName) {
+        return cultureService.createCulture(cultureName);
     }
 
 }
