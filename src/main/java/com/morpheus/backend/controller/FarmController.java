@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +35,11 @@ public class FarmController {
     @PostMapping("/createFarm")
     public String createFarm(@RequestBody FarmDTO farmDTO) throws Exception{
         return farmService.createFarm(farmDTO);
+    }
+
+    @PutMapping("updateFarm/{id}")
+    public String updateFarm(@PathVariable Long id, @RequestBody FarmDTO farmDTO) throws Exception{
+        return farmService.updateFarm(id, farmDTO);
     }
 
 }
