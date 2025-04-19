@@ -42,4 +42,21 @@ public class FarmController {
         return farmService.updateFarm(id, farmDTO);
     }
 
+    @PutMapping("updateFarmName/{id}")
+    public String updateFarmName(@PathVariable Long id, @RequestBody FarmDTO farmDTO) throws Exception{
+        return farmService.updateFarmName(id, farmDTO.getFarmName());
+    }
+
+
+    @PutMapping("updateFarmCity/{id}")
+    public String updateFarmCity(@PathVariable Long id, @RequestBody FarmDTO farmDTO) throws Exception{
+        return farmService.updateFarmCity(id, farmDTO.getFarmCity());
+    }
+
+
+    @PutMapping("updateFarmState/{id}")
+    public String updateFarmState(@PathVariable Long id, @RequestBody FarmDTO farmDTO) throws Exception{
+        return farmService.updateFarmState(id, farmDTO.getFarmState());
+    }
+
 }
