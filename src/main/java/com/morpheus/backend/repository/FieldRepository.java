@@ -67,5 +67,6 @@ public interface FieldRepository extends JpaRepository<Field, Long>{
         @Param("harvest") String harvest,
         @Param("farmName") String farmName
     );
-    
+
+    boolean existsByFarmName(String farmName);
 }
