@@ -36,8 +36,8 @@ public class CultureController {
     }
 
     @PostMapping
-    public String createCulture(@RequestBody CultureDTO cultureName) {
-        return cultureService.createCulture(cultureName);
+    public String createCulture(@RequestBody CultureDTO culture) {
+        return cultureService.createCulture(culture.getName());
     }
 
 }
