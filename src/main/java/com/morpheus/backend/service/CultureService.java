@@ -47,7 +47,6 @@ public class CultureService {
         }
     }
 
-
     public String createCulture(String cultureName) {
         try {
             if (cultureName == null || cultureName.isEmpty()) {
@@ -66,20 +65,18 @@ public class CultureService {
         }
     }
 
-
-    public String updateCultureName(Long id, String cultureName){
+    public String updateCulture(Long id, String cultureName){
         try {
-            String oldName = "";
             Culture culture = cultureRepository.getCultureById(id);
 
             if(culture == null){
                 throw new Exception();
             }
-            if(cultureName.isEmpty()){
+            if(cultureName == null || cultureName.isEmpty()){
                 throw new Exception();
             }
 
-            oldName = culture.getName();
+            String oldName = culture.getName();
             culture.setName(cultureName);
             cultureRepository.save(culture);
 
