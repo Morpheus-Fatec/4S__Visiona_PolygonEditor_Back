@@ -3,6 +3,7 @@ package com.morpheus.backend.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,16 +48,18 @@ public class FarmController {
         return farmService.updateFarmName(id, farmDTO.getFarmName());
     }
 
-
     @PutMapping("updateFarmCity/{id}")
     public String updateFarmCity(@PathVariable Long id, @RequestBody FarmDTO farmDTO) throws Exception{
         return farmService.updateFarmCity(id, farmDTO.getFarmCity());
     }
-
 
     @PutMapping("updateFarmState/{id}")
     public String updateFarmState(@PathVariable Long id, @RequestBody FarmDTO farmDTO) throws Exception{
         return farmService.updateFarmState(id, farmDTO.getFarmState());
     }
 
+        @DeleteMapping("deleteFarm/{id}")
+    public String deleteFarm(@PathVariable Long id) throws Exception{
+        return farmService.deleteFarmById(id);
+    }
 }
