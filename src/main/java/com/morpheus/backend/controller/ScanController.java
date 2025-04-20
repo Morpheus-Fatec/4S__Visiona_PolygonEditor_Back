@@ -48,7 +48,7 @@ public class ScanController {
             control.setField(fieldCreated);
 
             classificationControlRepository.save(control);
-            classificationService.createAutomaticClassification(fieldCreated, fieldDTO.getClassification());
+            classificationService.createAutomaticClassification(control, fieldDTO.getClassification());
         }
 
         return scanCreated.getId();

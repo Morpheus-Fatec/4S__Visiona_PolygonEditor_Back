@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,10 +28,12 @@ public class RevisionManualClassification {
     @Column(name = "id_revisao_classificacao_manual")
     private Long id;
 
+    @ManyToOne
     @JoinColumn(name = "id_controle_classificacao",referencedColumnName = "id_controle_classificacao", nullable = false)
     private ClassificationControl classificationControl;
 
-    @Column(name = "id_consultor", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_consultor", referencedColumnName = "id_usuario", nullable = false)
     private User userResponsable;
 
     @Column(name = "coordenadas_destaque", columnDefinition = "geometry(MultiPolygon, 4326)")

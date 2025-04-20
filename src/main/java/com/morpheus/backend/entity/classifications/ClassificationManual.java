@@ -30,6 +30,7 @@ public class ClassificationManual {
     @Column(name = "id_classificacao_manual")
     private Long id;
 
+    @ManyToOne
     @JoinColumn(name = "id_controle_classificacao",referencedColumnName = "id_controle_classificacao", nullable = false)
     private ClassificationControl classificationControl;
     
@@ -37,7 +38,8 @@ public class ClassificationManual {
     @JoinColumn(name = "id_classe", referencedColumnName = "id_classe", nullable = false)
     private ClassEntity clasEntity;
 
-    @Column(name = "id_analista", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "id_analista", referencedColumnName = "id_usuario", nullable = false)
     private User userResponsable;
 
     @Column(name = "coordenadas_manual", columnDefinition = "geometry(MultiPolygon, 4326)")

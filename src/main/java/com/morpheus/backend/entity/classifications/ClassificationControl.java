@@ -28,7 +28,7 @@ public class ClassificationControl {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JoinColumn(name = "id_controle_classificacao")
+    @Column(name = "id_controle_classificacao")
     private Long idControle;
 
     @ManyToOne(optional = false)

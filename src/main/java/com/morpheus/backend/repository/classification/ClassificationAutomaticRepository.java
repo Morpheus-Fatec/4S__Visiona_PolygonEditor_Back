@@ -14,11 +14,11 @@ public interface ClassificationAutomaticRepository extends JpaRepository<Classif
         SELECT 
             ca.id_classificacao_automatica AS id,
             ca.area AS area,
-            ST_AsGeoJSON(ca.coordenadas_automaticas) AS coordinates,
+            ST_AsGeoJSON(ca.coordenadas_automatica) AS coordinates,
             cl.nome AS classEntity
         FROM 
             controle_classificacao cc
-        JOIN id_classificacao_automatica ca ON cc.id_controle_classificacao = ca.id_controle_classificacao
+        JOIN classficacao_automatica ca ON cc.id_controle_classificacao = ca.id_controle_classificacao
         JOIN classes cl ON cl.id_classe = ca.id_classe
         WHERE 
             cc.id_talhao = :fieldId

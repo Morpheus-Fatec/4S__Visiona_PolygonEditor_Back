@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.morpheus.backend.entity.Field;
 import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
+import com.morpheus.backend.entity.classifications.ClassificationControl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.AutomaticClassificationDTO;
 import com.morpheus.backend.entity.ClassEntity;
@@ -30,7 +30,7 @@ public class ClassificationService {
     private ClassEntityRepository classEntityRepository;
 
     @Transactional
-    public void createAutomaticClassification(Field field, List<AutomaticClassificationDTO> automaticClassificationDTO) throws JsonProcessingException {
+    public void createAutomaticClassification(ClassificationControl control, List<AutomaticClassificationDTO> automaticClassificationDTO) throws JsonProcessingException {
         List<ClassificationAutomatic> automaticClassifications = new ArrayList<>();
         Map<String, ClassEntity> classEntityCache = new HashMap<>();
         Set<String> classEntityNames = automaticClassificationDTO.stream()
@@ -58,6 +58,7 @@ public class ClassificationService {
 
         for (AutomaticClassificationDTO classificationDTO : automaticClassificationDTO) {
             ClassificationAutomatic classificationAutomatic = new ClassificationAutomatic();
+            classificationAutomatic.setClassificationControl(control);
             classificationAutomatic.setArea(classificationDTO.getArea());
             classificationAutomatic.setCoordenadas(classificationDTO.convertStringToMultiPolygon());
             classificationAutomatic.setClassEntity(classEntityCache.get(classificationDTO.getClassEntity()));

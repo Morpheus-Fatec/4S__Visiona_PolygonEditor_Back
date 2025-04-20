@@ -29,6 +29,7 @@ public class ClassificationAutomatic {
     @Column(name = "id_classificacao_automatica")
     private Long id;
 
+    @ManyToOne
     @JoinColumn(name = "id_controle_classificacao",referencedColumnName = "id_controle_classificacao", nullable = false)
     private ClassificationControl classificationControl;
 
