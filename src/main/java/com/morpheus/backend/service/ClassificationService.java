@@ -11,12 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.entity.Field;
+import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.morpheus.backend.DTO.ClassificationDTO;
+import com.morpheus.backend.DTO.AutomaticClassificationDTO;
 import com.morpheus.backend.entity.ClassEntity;
-import com.morpheus.backend.entity.Classification;
 import com.morpheus.backend.repository.ClassEntityRepository;
-import com.morpheus.backend.repository.ClassificationRepository;
+import com.morpheus.backend.repository.classification.ClassificationAutomaticRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -24,17 +24,17 @@ import jakarta.transaction.Transactional;
 public class ClassificationService {
 
     @Autowired
-    private ClassificationRepository classificationRepository;
+    private ClassificationAutomaticRepository ClassificationAutomaticRepository;
 
     @Autowired
     private ClassEntityRepository classEntityRepository;
 
     @Transactional
-    public void createClassification(Field field, List<ClassificationDTO> classificationDTOs) throws JsonProcessingException {
-        List<Classification> classifications = new ArrayList<>();
+    public void createAutomaticClassification(Field field, List<AutomaticClassificationDTO> automaticClassificationDTO) throws JsonProcessingException {
+        List<ClassificationAutomatic> automaticClassifications = new ArrayList<>();
         Map<String, ClassEntity> classEntityCache = new HashMap<>();
-        Set<String> classEntityNames = classificationDTOs.stream()
-                .map(ClassificationDTO::getClassEntity)
+        Set<String> classEntityNames = automaticClassificationDTO.stream()
+                .map(AutomaticClassificationDTO::getClassEntity)
                 .collect(Collectors.toSet());
 
         List<ClassEntity> existingClassEntities = classEntityRepository.findByNameIn(classEntityNames);
@@ -56,15 +56,14 @@ public class ClassificationService {
             classEntityRepository.saveAll(newClassEntities);
         }
 
-        for (ClassificationDTO classificationDTO : classificationDTOs) {
-            Classification classificationEntity = new Classification();
-            classificationEntity.setField(field);
-            classificationEntity.setArea(classificationDTO.getArea());
-            classificationEntity.setOriginalCoordinates(classificationDTO.convertStringToMultiPolygon());
-            classificationEntity.setClassEntity(classEntityCache.get(classificationDTO.getClassEntity()));
-            classifications.add(classificationEntity);
+        for (AutomaticClassificationDTO classificationDTO : automaticClassificationDTO) {
+            ClassificationAutomatic classificationAutomatic = new ClassificationAutomatic();
+            classificationAutomatic.setArea(classificationDTO.getArea());
+            classificationAutomatic.setCoordenadas(classificationDTO.convertStringToMultiPolygon());
+            classificationAutomatic.setClassEntity(classEntityCache.get(classificationDTO.getClassEntity()));
+            automaticClassifications.add(classificationAutomatic);
         }
 
-        classificationRepository.saveAll(classifications);
+        ClassificationAutomaticRepository.saveAll(automaticClassifications);
     }
 }

@@ -33,7 +33,7 @@ public class CreateFieldDTO implements Converter {
     private String nameFarm;
     private Float productivity;
     private String soil;
-    private List<ClassificationDTO> classification;
+    private List<AutomaticClassificationDTO> classification;
 
     @Override
     public MultiPolygon convertStringToMultiPolygon() throws JsonProcessingException {

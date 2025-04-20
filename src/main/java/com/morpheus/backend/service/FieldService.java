@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.morpheus.backend.DTO.ClassificationDTO;
+import com.morpheus.backend.DTO.AutomaticClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.FieldDTO;
@@ -29,12 +29,12 @@ import com.morpheus.backend.entity.Image;
 import com.morpheus.backend.entity.Scan;
 import com.morpheus.backend.entity.Soil;
 import com.morpheus.backend.entity.Status;
-import com.morpheus.backend.repository.ClassificationRepository;
 import com.morpheus.backend.repository.CultureRepository;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
+import com.morpheus.backend.repository.classification.ClassificationAutomaticRepository;
 import com.morpheus.exceptions.DefaultException;
 
 @Service
@@ -56,7 +56,7 @@ public class FieldService {
     private ImageRepository imageRepository;
 
     @Autowired
-    private ClassificationRepository classificationRepository;
+    private ClassificationAutomaticRepository classificationAutomaticRepository;
 
     public Field createField(CreateFieldDTO fieldDTO, Scan scan){
         try {
@@ -152,7 +152,7 @@ public class FieldService {
     public FeatureCollectionDTO getCompleteFieldById(Long idField) {
         FieldDTO field = fieldRepository.getFieldById(idField).orElseThrow(() -> new DefaultException("Talhão não encontrado."));
         Long scanID = field.getScanningId();
-        List<ClassificationDTO> classifications = classificationRepository.getClassificationByFieldId(field.getId());
+        List<AutomaticClassificationDTO> classifications = classificationAutomaticRepository.getClassificationAutomaticByFieldId(field.getId());
         List<Image> images = imageRepository.getImagesByScanId(scanID);
 
         FarmDTO farmDTO = field.getFarm();

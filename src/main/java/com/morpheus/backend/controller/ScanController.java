@@ -13,6 +13,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.ScanTestDTO;
 import com.morpheus.backend.entity.Scan;
+import com.morpheus.backend.entity.classifications.ClassificationControl;
+import com.morpheus.backend.repository.classification.ClassificationControlRepository;
 import com.morpheus.backend.entity.Field;
 import com.morpheus.backend.service.ClassificationService;
 import com.morpheus.backend.service.FieldService;
@@ -28,6 +30,9 @@ public class ScanController {
     private FieldService fieldService;
 
     @Autowired
+    private ClassificationControlRepository classificationControlRepository;
+
+    @Autowired
     private ClassificationService classificationService;
 
 
@@ -38,7 +43,12 @@ public class ScanController {
         
         for (CreateFieldDTO fieldDTO : scan.getFields()) {
             Field fieldCreated = fieldService.createField(fieldDTO, scanCreated);
-            classificationService.createClassification(fieldCreated, fieldDTO.getClassification());
+
+            ClassificationControl control = new ClassificationControl();
+            control.setField(fieldCreated);
+
+            classificationControlRepository.save(control);
+            classificationService.createAutomaticClassification(fieldCreated, fieldDTO.getClassification());
         }
 
         return scanCreated.getId();
