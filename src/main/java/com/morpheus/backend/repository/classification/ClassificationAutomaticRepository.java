@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-import com.morpheus.backend.DTO.AutomaticClassificationDTO;
+import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
 
 public interface ClassificationAutomaticRepository extends JpaRepository<ClassificationAutomatic, Long>{
@@ -23,6 +23,6 @@ public interface ClassificationAutomaticRepository extends JpaRepository<Classif
         WHERE 
             cc.id_talhao = :fieldId
         """, nativeQuery = true)
-    List<AutomaticClassificationDTO> getClassificationAutomaticByFieldId(Long fieldId);
+    List<ClassificationDTO> getClassificationAutomaticByFieldId(Long fieldId);
 
 }

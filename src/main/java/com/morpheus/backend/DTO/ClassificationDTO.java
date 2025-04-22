@@ -9,9 +9,11 @@ import com.morpheus.backend.utilities.Converter;
 import com.morpheus.backend.utilities.GeoJsonToJTSConverter;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-public class AutomaticClassificationDTO implements Converter {
+@NoArgsConstructor
+public class ClassificationDTO implements Converter {
 
     private static GeoJsonToJTSConverter geoJsonToJTSConverter = new GeoJsonToJTSConverter();;
 
@@ -20,7 +22,7 @@ public class AutomaticClassificationDTO implements Converter {
     private String coordinates;
     private String classEntity;
 
-    public AutomaticClassificationDTO(Long id, BigDecimal area, String coordinates, String classEntity) {
+    public ClassificationDTO(Long id, BigDecimal area, String coordinates, String classEntity) {
         this.id = id;
         this.area = area;
         this.coordinates = coordinates;

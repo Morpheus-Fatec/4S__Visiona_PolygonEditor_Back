@@ -2,8 +2,6 @@ package com.morpheus.backend.entity.classifications;
 
 import org.locationtech.jts.geom.MultiPolygon;
 
-import com.morpheus.backend.entity.User;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,10 +29,6 @@ public class RevisionManualClassification {
     @ManyToOne
     @JoinColumn(name = "id_controle_classificacao",referencedColumnName = "id_controle_classificacao", nullable = false)
     private ClassificationControl classificationControl;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_consultor", referencedColumnName = "id_usuario", nullable = false)
-    private User userResponsable;
 
     @Column(name = "coordenadas_destaque", columnDefinition = "geometry(MultiPolygon, 4326)")
     private MultiPolygon coordenatiesHighLight;

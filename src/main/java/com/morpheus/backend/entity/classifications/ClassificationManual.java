@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import org.locationtech.jts.geom.MultiPolygon;
 
 import com.morpheus.backend.entity.ClassEntity;
-import com.morpheus.backend.entity.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,16 +30,12 @@ public class ClassificationManual {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_controle_classificacao",referencedColumnName = "id_controle_classificacao", nullable = false)
+    @JoinColumn(name = "id_controle_classificacao", referencedColumnName = "id_controle_classificacao", nullable = false)
     private ClassificationControl classificationControl;
     
     @ManyToOne
     @JoinColumn(name = "id_classe", referencedColumnName = "id_classe", nullable = false)
-    private ClassEntity clasEntity;
-
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "id_analista", referencedColumnName = "id_usuario", nullable = false)
-    private User userResponsable;
+    private ClassEntity classEntity;
 
     @Column(name = "coordenadas_manual", columnDefinition = "geometry(MultiPolygon, 4326)")
     private MultiPolygon coordenadas;
