@@ -10,8 +10,11 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.DTO.CultureDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.FieldDTO;
+import com.morpheus.backend.DTO.FieldUpdatesDTO;
+import com.morpheus.backend.DTO.SoilDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
@@ -37,8 +40,19 @@ import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
 import com.morpheus.exceptions.DefaultException;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @Service
 public class FieldService {
+
+    @Autowired
+    FarmService farmService;
+
+    @Autowired
+    SoilService soilService;
+    
+    @Autowired
+    CultureService cultureService;
 
     @Autowired
     private FieldRepository fieldRepository;
@@ -213,4 +227,77 @@ public class FieldService {
         
         return featureCollection;
     }
+
+    public FieldUpdatesDTO updateField(Long id, FieldUpdatesDTO dto) {
+        Field field = fieldRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Talhão não encontrado!"));
+
+        validate(dto);
+    
+        field.setName(dto.getName());
+        field.setHarvest(dto.getHarvest());
+        field.setProductivity(dto.getProductivity());
+    
+        if (dto.getFarm() != null) {
+            Farm farm = dto.getFarm();
+            FarmDTO farmDTO = new FarmDTO(farm.getFarmName(), farm.getFarmCity(), farm.getFarmState());
+            farmService.updateFarm(farm.getId(), farmDTO);
+        }
+        
+        if (dto.getSoil() != null) {
+            soilService.updateSoil(dto.getSoil().getId(), dto.getSoil().getName());
+        }
+        
+        if (dto.getCulture() != null) {
+            cultureService.updateCulture(dto.getCulture().getId(), dto.getCulture().getName());
+        }
+    
+        Field updatedField = fieldRepository.save(field);
+
+        return mapToDto(updatedField);
+    }
+    
+
+    private void validate(FieldUpdatesDTO dto) {
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            throw new DefaultException("O nome do Talhão é obrigatório.");
+        }
+        if (dto.getHarvest() == null || dto.getHarvest().trim().isEmpty()) {
+            throw new DefaultException("A safra é obrigatória.");
+        }
+        if (dto.getProductivity() == null) {
+            throw new DefaultException("A produtividade é obrigatória.");
+        }
+    }
+    
+    private FieldUpdatesDTO mapToDto(Field field) {
+        FieldUpdatesDTO dto = new FieldUpdatesDTO();
+        dto.setId(field.getId());
+        dto.setName(field.getName());
+        dto.setArea(field.getArea());
+        dto.setHarvest(field.getHarvest());
+        dto.setStatus(field.getStatus().toString());
+        dto.setProductivity(field.getProductivity());
+    
+        Farm farm = new Farm();
+        farm.setId(field.getFarm().getId());
+        farm.setFarmName(field.getFarm().getFarmName());
+        farm.setFarmCity(field.getFarm().getFarmCity());
+        farm.setFarmState(field.getFarm().getFarmState());
+        dto.setFarm(farm);
+
+        Culture culture = new Culture();
+        culture.setId(field.getCulture().getId());
+        culture.setName(field.getCulture().getName());
+        dto.setCulture(culture);
+
+        Soil soil = new Soil();
+        soil.setId(field.getSoil().getId());
+        soil.setName(field.getSoil().getName());
+        dto.setSoil(soil);
+    
+        return dto;
+    }
+    
+
 }

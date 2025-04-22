@@ -4,15 +4,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.morpheus.backend.DTO.FieldUpdatesDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.service.FieldService;
 
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/field")
@@ -41,4 +46,18 @@ public class FieldController {
 
         return ResponseEntity.ok(featureCollectionDTO);
     }
+
+    @PutMapping("/{id}/avaliar")
+    public ResponseEntity<Map<String, String>> updateField(
+            @PathVariable Long id,
+            @RequestBody FieldUpdatesDTO dto) {
+        
+        fieldService.updateField(id, dto);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Talhão atualizado com sucesso.");
+        
+        return ResponseEntity.ok(response);
+    }
+
 }
