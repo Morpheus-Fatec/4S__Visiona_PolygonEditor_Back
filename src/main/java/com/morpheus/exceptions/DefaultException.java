@@ -10,7 +10,7 @@ public class DefaultException extends RuntimeException{
 
     public DefaultException(String message){
         super(message);
-        this.errorResponse = new ErrorResponse(message);
+        this.errorResponse = new ErrorResponse(message, message);
     }
 
 }
