@@ -5,12 +5,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.morpheus.backend.DTO.FieldUpdatesDTO;
+import com.morpheus.backend.DTO.Download.SaidaDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.service.FieldService;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -59,5 +70,27 @@ public class FieldController {
         
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/downloadSaida/{id}")
+    public ResponseEntity<byte[]> downloadGeoJson(@PathVariable Long id) {
+        SaidaDTO geoJson = fieldService.gerarGeoJsonPorId(id);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            byte[] jsonBytes = objectMapper.writeValueAsBytes(geoJson);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDisposition(ContentDisposition.builder("attachment")
+                .filename("talhao_" + id + ".geojson")
+                .build());
+
+            return new ResponseEntity<>(jsonBytes, headers, HttpStatus.OK);
+
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Erro ao gerar GeoJSON: " + e.getMessage(), e);
+        }
+    }
+
 
 }

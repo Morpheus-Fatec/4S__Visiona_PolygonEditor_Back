@@ -10,11 +10,14 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
-import com.morpheus.backend.DTO.CultureDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.FieldDTO;
 import com.morpheus.backend.DTO.FieldUpdatesDTO;
-import com.morpheus.backend.DTO.SoilDTO;
+import com.morpheus.backend.DTO.Download.CrsDto;
+import com.morpheus.backend.DTO.Download.FeaturesDto;
+import com.morpheus.backend.DTO.Download.FieldPropertiesDto;
+import com.morpheus.backend.DTO.Download.GeometryDto;
+import com.morpheus.backend.DTO.Download.SaidaDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
@@ -38,12 +41,16 @@ import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
+import com.morpheus.backend.utilities.ConverterToMultipolygon;
 import com.morpheus.exceptions.DefaultException;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class FieldService {
+
+    @Autowired
+    ConverterToMultipolygon converterToMultipolygon;
 
     @Autowired
     FarmService farmService;
@@ -298,6 +305,29 @@ public class FieldService {
     
         return dto;
     }
-    
+
+    public SaidaDTO gerarGeoJsonPorId(Long fieldId) {
+    Field field = fieldRepository.findById(fieldId)
+        .orElseThrow(() -> new EntityNotFoundException("Talhão não encontrado"));
+
+    CrsDto crs = new CrsDto();
+
+    FieldPropertiesDto propertiesDto = new FieldPropertiesDto(
+        field.getName(), 
+        field.getArea(), 
+        field.getSoil().getName(),
+        field.getCulture().getName(),
+        field.getHarvest(),
+        field.getFarm().getFarmName()
+    );
+
+    List<List<List<List<Double>>>> multipolygon = converterToMultipolygon.converterToMultiPolygon(field.getCoordinates());
+
+
+    GeometryDto geometryDto = new GeometryDto(multipolygon);;
+    FeaturesDto featureDto = new FeaturesDto(propertiesDto, geometryDto);
+
+    return new SaidaDTO(crs, featureDto);
+    }
 
 }
