@@ -1,4 +1,4 @@
-package com.morpheus.backend.DTO.Download;
+package com.morpheus.backend.DTO.Download.DownloadSaida;
 
 import java.util.List;
 

@@ -5,13 +5,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.morpheus.backend.DTO.FieldUpdatesDTO;
-import com.morpheus.backend.DTO.Download.SaidaDTO;
+import com.morpheus.backend.DTO.PaginatedFieldResponse;
+import com.morpheus.backend.DTO.Download.DownloadManual.ManualDTO;
+import com.morpheus.backend.DTO.Download.DownloadSaida.SaidaDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
+import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
+import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
+import com.morpheus.backend.entity.classifications.ClassificationControl;
+import com.morpheus.backend.repository.classification.ClassificationControlRepository;
 import com.morpheus.backend.service.FieldService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,19 +48,24 @@ public class FieldController {
     @Autowired
     private FieldService fieldService;
 
+    @Autowired
+    private ClassificationControlRepository classificationControlRepository;
+
     @GetMapping("/featureCollectionSimple")
-    public ResponseEntity<FeatureCollectionSimpleDTO> getAllFeatureCollectionSimpleDTO(
+    public ResponseEntity<PaginatedFieldResponse<FeatureSimpleDTO>> getAllFeatureCollectionSimpleDTO(
         @RequestParam(required = false) String name,
         @RequestParam(required = false) String soil,
         @RequestParam(required = false) String status,
         @RequestParam(required = false) String culture,
         @RequestParam(required = false) String harvest,
-        @RequestParam(required = false) String farmName
+        @RequestParam(required = false) String farmName,
+        @RequestParam (defaultValue = "1")int page, 
+        @RequestParam(defaultValue = "20") int itens
     ) {
-        FeatureCollectionSimpleDTO featureCollection = fieldService.getAllFeatureCollectionSimpleDTO(
-            name, soil, status, culture, harvest, farmName  
-        );
-        return ResponseEntity.ok(featureCollection);
+
+        PaginatedFieldResponse<FeatureSimpleDTO> fields = fieldService.getAllFeatureCollectionSimpleDTO(name, soil, status, culture,  harvest, farmName, page, itens);
+
+        return ResponseEntity.ok(fields);
     }
 
     @GetMapping("/featureCollection/{id}")
@@ -71,25 +88,51 @@ public class FieldController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/downloadSaida/{id}")
-    public ResponseEntity<byte[]> downloadGeoJson(@PathVariable Long id) {
-        SaidaDTO geoJson = fieldService.gerarGeoJsonPorId(id);
+    @GetMapping("/{id}/downloadTalhao")
+    public ResponseEntity<byte[]> downloadGeoJson(@PathVariable Long id) throws IOException {
+        SaidaDTO automatic = fieldService.gerarGeoJsonPorId(id);
+        ManualDTO manual = fieldService.gerarGeoJsonPorIdManual(id);
 
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            byte[] jsonBytes = objectMapper.writeValueAsBytes(geoJson);
+        ClassificationControl classificationControl = classificationControlRepository.findByFieldId(id);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDisposition(ContentDisposition.builder("attachment")
-                .filename("talhao_" + id + ".geojson")
-                .build());
+        ObjectMapper mapper = new ObjectMapper();
+        byte[] automaticoBytes = mapper.writeValueAsBytes(automatic);
+        byte[] manualBytes = mapper.writeValueAsBytes(manual);
 
-            return new ResponseEntity<>(jsonBytes, headers, HttpStatus.OK);
+        LocalDateTime approvedDate = classificationControl.getDateTimeApproved();
+        String farmName = automatic.getFeatures().getProperties().getFarm();
+        String fieldName = automatic.getFeatures().getProperties().getName();
+        String formatFarmName = farmName.replaceAll("\\s+", "_").toUpperCase();
+        String formatFieldName = fieldName.replaceAll("\\s+", "_").toUpperCase();
+        String formatDate = approvedDate.format(DateTimeFormatter.ofPattern("ddMMyyyy"));
+    
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Erro ao gerar GeoJSON: " + e.getMessage(), e);
+        String automaticFileName = formatFieldName + "_" + formatFarmName + "_" + formatDate + "_BM2_GEOJSON_SAIDA.geojson";
+        String manualFileName = formatFieldName + "_" + formatFarmName + "_" + formatDate + "_MAPA_CLASSIF_MANUAL.geojson";
+        String zipFileName = formatFieldName + "_" + formatFarmName + "_" + formatDate + "_MAPAS_TALHAO.zip";
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOut = new ZipOutputStream(byteArrayOutputStream)) {
+            ZipEntry entry1 = new ZipEntry(automaticFileName);
+            zipOut.putNextEntry(entry1);
+            zipOut.write(automaticoBytes);
+            zipOut.closeEntry();
+
+            ZipEntry entry2 = new ZipEntry(manualFileName);
+            zipOut.putNextEntry(entry2);
+            zipOut.write(manualBytes);
+            zipOut.closeEntry();
         }
+
+        byte[] zipBytes = byteArrayOutputStream.toByteArray();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDisposition(ContentDisposition.attachment()
+            .filename(zipFileName)
+            .build());
+
+        return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
     }
 
 

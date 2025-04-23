@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,11 +16,15 @@ import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.FieldDTO;
 import com.morpheus.backend.DTO.FieldUpdatesDTO;
-import com.morpheus.backend.DTO.Download.CrsDto;
-import com.morpheus.backend.DTO.Download.FeaturesDto;
-import com.morpheus.backend.DTO.Download.FieldPropertiesDto;
-import com.morpheus.backend.DTO.Download.GeometryDto;
-import com.morpheus.backend.DTO.Download.SaidaDTO;
+import com.morpheus.backend.DTO.PaginatedFieldResponse;
+import com.morpheus.backend.DTO.Download.DownloadManual.FeatureManualDto;
+import com.morpheus.backend.DTO.Download.DownloadManual.FieldPropertiesManualDto;
+import com.morpheus.backend.DTO.Download.DownloadManual.ManualDTO;
+import com.morpheus.backend.DTO.Download.DownloadSaida.CrsDto;
+import com.morpheus.backend.DTO.Download.DownloadSaida.FeaturesDto;
+import com.morpheus.backend.DTO.Download.DownloadSaida.FieldPropertiesDto;
+import com.morpheus.backend.DTO.Download.DownloadSaida.GeometryDto;
+import com.morpheus.backend.DTO.Download.DownloadSaida.SaidaDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
@@ -35,13 +42,14 @@ import com.morpheus.backend.entity.Image;
 import com.morpheus.backend.entity.Scan;
 import com.morpheus.backend.entity.Soil;
 import com.morpheus.backend.entity.Status;
-import com.morpheus.backend.repository.ClassificationRepository;
+import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
 import com.morpheus.backend.repository.CultureRepository;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
 import com.morpheus.backend.utilities.ConverterToMultipolygon;
+import com.morpheus.backend.repository.classification.ClassificationAutomaticRepository;
 import com.morpheus.exceptions.DefaultException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -77,7 +85,7 @@ public class FieldService {
     private ImageRepository imageRepository;
 
     @Autowired
-    private ClassificationRepository classificationRepository;
+    private ClassificationAutomaticRepository classificationAutomaticRepository;
 
     public Field createField(CreateFieldDTO fieldDTO, Scan scan){
         try {
@@ -124,33 +132,34 @@ public class FieldService {
         }
     }
 
-    public FeatureCollectionSimpleDTO getAllFeatureCollectionSimpleDTO(
-        String name, String soil, String status, String culture, String harvest, String farmName) {
-        
-        List<Object[]> results = fieldRepository.getAllFeatureSimpleDTO(name, soil, status, culture, harvest, farmName);
+    public PaginatedFieldResponse<FeatureSimpleDTO> getAllFeatureCollectionSimpleDTO(
+        String name, String soil, String status, String culture, String harvest, String farmName, int page, int itens) {
+        PageRequest pageable = PageRequest.of(page -1,itens,Sort.by(Sort.Direction.ASC, "id_talhao"));
+        Page<FieldDTO> results = fieldRepository.getAllFeatureSimpleDTO(name, soil, status, culture, harvest, farmName, pageable);
     
         List<FeatureSimpleDTO> featureSimpleDTOList = results.stream().map(obj -> {
             // Criando o DTO da Fazenda
             FarmDTO farmDTO = new FarmDTO();
-            farmDTO.setFarmName((String) obj[2]);
-            farmDTO.setFarmCity((String) obj[8]);
-            farmDTO.setFarmState((String) obj[9]);
+            farmDTO.setFarmName((String) obj.getFarm().getFarmName());
+            farmDTO.setFarmCity((String) obj.getFarm().getFarmCity());
+            farmDTO.setFarmState((String) obj.getFarm().getFarmState());
     
             // Criando o DTO das propriedades
             PropertiesDTO properties = new PropertiesDTO();
-            properties.setId(((Number) obj[0]).longValue());
-            properties.setName((String) obj[1]);
+            properties.setId((Long) ((Number) obj.getId()));
+            properties.setName((String) obj.getName());
             properties.setFarm(farmDTO);
-            properties.setCulture((String) obj[3]);
-            properties.setArea((BigDecimal) obj[6]);
-            properties.setSoil((String) obj[10]);
-            properties.setHarvest((String) obj[7]);
-            properties.setStatus(Status.valueOf((String) obj[5]).getPortugueseValue());
+            properties.setCulture((String) obj.getCulture());
+            properties.setArea((BigDecimal) obj.getArea());
+            properties.setSoil((String) obj.getSoil());
+            properties.setHarvest((String) obj.getHarvest());
+            Status statusProp = Status.valueOf(((String) obj.getStatus()).toUpperCase()); 
+            properties.setStatus(statusProp.getPortugueseValue());
     
             // Criando o DTO da geometria
             GeometryDTO geometry = new GeometryDTO();
             try {
-                geometry.convertToGeoJson((String) obj[4]);
+                geometry.convertToGeoJson((String) obj.getCoordinates().toString());
             } catch (JsonProcessingException e) {
 
                 e.printStackTrace();
@@ -167,13 +176,17 @@ public class FieldService {
             FeatureCollectionSimpleDTO featureCollection = new FeatureCollectionSimpleDTO();
             featureCollection.setFeatures(featureSimpleDTOList);
     
-            return featureCollection;
+            return new PaginatedFieldResponse<FeatureSimpleDTO>(
+                featureSimpleDTOList,
+                results.getTotalPages(),
+                results.getTotalElements()
+            );
         }
     
     public FeatureCollectionDTO getCompleteFieldById(Long idField) {
         FieldDTO field = fieldRepository.getFieldById(idField).orElseThrow(() -> new DefaultException("Talhão não encontrado."));
         Long scanID = field.getScanningId();
-        List<ClassificationDTO> classifications = classificationRepository.getClassificationByFieldId(field.getId());
+        List<ClassificationDTO> classifications = classificationAutomaticRepository.getClassificationAutomaticByFieldId(field.getId());
         List<Image> images = imageRepository.getImagesByScanId(scanID);
 
         FarmDTO farmDTO = field.getFarm();
@@ -184,7 +197,8 @@ public class FieldService {
         properties.setArea(field.getArea());
         properties.setCulture(field.getCulture());
         properties.setHarvest(field.getHarvest());
-        properties.setStatus(field.getStatus());
+        Status statusProp = Status.valueOf(((String) field.getStatus()).toUpperCase()); 
+        properties.setStatus(statusProp.getPortugueseValue());
         properties.setSoil(field.getSoil());
         properties.setFarm(farmDTO);
 
@@ -310,6 +324,10 @@ public class FieldService {
     Field field = fieldRepository.findById(fieldId)
         .orElseThrow(() -> new EntityNotFoundException("Talhão não encontrado"));
 
+    if (field.getStatus() != Status.APPROVED) {
+        throw new DefaultException("O talhão precisa estar aprovado para gerar o GeoJSON");
+    }
+
     CrsDto crs = new CrsDto();
 
     FieldPropertiesDto propertiesDto = new FieldPropertiesDto(
@@ -328,6 +346,32 @@ public class FieldService {
     FeaturesDto featureDto = new FeaturesDto(propertiesDto, geometryDto);
 
     return new SaidaDTO(crs, featureDto);
+    }
+
+    public ManualDTO gerarGeoJsonPorIdManual(Long fielId){
+        ClassificationAutomatic classificationAutomatic = classificationAutomaticRepository.findById(fielId)
+        .orElseThrow(() -> new EntityNotFoundException("Talhão não encontrado"));
+
+        Field field = classificationAutomatic.getClassificationControl().getField();
+
+        if (field.getStatus() != Status.APPROVED) {
+            throw new DefaultException("O talhão precisa estar aprovado para gerar o GeoJSON");
+        }
+
+        CrsDto crs = new CrsDto();
+
+        FieldPropertiesManualDto propertiesManualDto = new FieldPropertiesManualDto(
+            classificationAutomatic.getClassEntity().getName(),
+            classificationAutomatic.getArea(),
+            classificationAutomatic.getClassificationControl().getField().getName());
+
+        List<List<List<List<Double>>>> multipolygon = converterToMultipolygon.converterToMultiPolygon(classificationAutomatic.getCoordenadas());
+
+        GeometryDto geometryDto = new GeometryDto(multipolygon);;
+        FeatureManualDto featureManualDto = new FeatureManualDto(propertiesManualDto, geometryDto);
+    
+        return new ManualDTO(crs, featureManualDto);
+
     }
 
 }

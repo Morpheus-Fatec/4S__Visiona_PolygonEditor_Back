@@ -1,4 +1,4 @@
-package com.morpheus.backend.DTO.Download;
+package com.morpheus.backend.DTO.Download.DownloadSaida;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

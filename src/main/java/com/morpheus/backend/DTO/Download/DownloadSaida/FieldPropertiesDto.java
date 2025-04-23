@@ -1,4 +1,6 @@
-package com.morpheus.backend.DTO.Download;
+package com.morpheus.backend.DTO.Download.DownloadSaida;
+
+import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -17,7 +19,7 @@ public class FieldPropertiesDto {
     private String name;
 
     @JsonProperty("AREA_HA_TL")
-    private Double area;
+    private BigDecimal area;
 
     @JsonProperty("SOLO")
     private String soil;
@@ -31,8 +33,7 @@ public class FieldPropertiesDto {
     @JsonProperty("FAZENDA")
     private String farm;
 
-    // Construtor completo (sem Lombok)
-    public FieldPropertiesDto(String name, Double area, String soil, String culture, String harvest, String farm) {
+    public FieldPropertiesDto(String name, BigDecimal area, String soil, String culture, String harvest, String farm) {
         this.name = name;
         this.area = area;
         this.soil = soil;
@@ -41,9 +42,8 @@ public class FieldPropertiesDto {
         this.farm = farm;
     }
 
-    // Getters (se necessário)
     public String getName() { return name; }
-    public Double getArea() { return area; }
+    public BigDecimal getArea() { return area; }
     public String getSoil() { return soil; }
     public String getCulture() { return culture; }
     public String getHarvest() { return harvest; }
