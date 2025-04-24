@@ -13,10 +13,12 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.DTO.CultureDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.FieldDTO;
 import com.morpheus.backend.DTO.FieldUpdatesDTO;
 import com.morpheus.backend.DTO.PaginatedFieldResponse;
+import com.morpheus.backend.DTO.SoilDTO;
 import com.morpheus.backend.DTO.Download.DownloadManual.FeatureManualDto;
 import com.morpheus.backend.DTO.Download.DownloadManual.FieldPropertiesManualDto;
 import com.morpheus.backend.DTO.Download.DownloadManual.ManualDTO;
@@ -149,9 +151,9 @@ public class FieldService {
             properties.setId((Long) ((Number) obj.getId()));
             properties.setName((String) obj.getName());
             properties.setFarm(farmDTO);
-            properties.setCulture((String) obj.getCulture());
+            properties.setCulture((CultureDTO) obj.getCulture());
             properties.setArea((BigDecimal) obj.getArea());
-            properties.setSoil((String) obj.getSoil());
+            properties.setSoil((SoilDTO) obj.getSoil());
             properties.setHarvest((String) obj.getHarvest());
             Status statusProp = Status.valueOf(((String) obj.getStatus()).toUpperCase()); 
             properties.setStatus(statusProp.getPortugueseValue());
@@ -261,7 +263,7 @@ public class FieldService {
     
         if (dto.getFarm() != null) {
             Farm farm = dto.getFarm();
-            FarmDTO farmDTO = new FarmDTO(farm.getFarmName(), farm.getFarmCity(), farm.getFarmState());
+            FarmDTO farmDTO = new FarmDTO(farm.getFarmName(), farm.getFarmCity(), farm.getFarmState(), farm.getId());
             farmService.updateFarm(farm.getId(), farmDTO);
         }
         
