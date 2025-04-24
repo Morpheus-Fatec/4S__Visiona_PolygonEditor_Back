@@ -1,6 +1,8 @@
 package com.morpheus.backend.service;
 
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -13,13 +15,11 @@ import com.morpheus.exceptions.DefaultException;
 @Service
 public class FarmService {
 
-    private final FarmRepository farmRepository;
-    private final FieldRepository fieldRepository;
+    @Autowired
+    private FarmRepository farmRepository;
 
-    public FarmService(FarmRepository farmRepository, FieldRepository fieldRepository) {
-        this.farmRepository = farmRepository;
-        this.fieldRepository = fieldRepository;
-    }
+    @Autowired
+    private FieldRepository fieldRepository;
 
     public List<Farm> getAllFarms() {
         List<Farm> farmList = farmRepository.findAll();
