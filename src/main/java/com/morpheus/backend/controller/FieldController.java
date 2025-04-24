@@ -9,9 +9,7 @@ import com.morpheus.backend.DTO.PaginatedFieldResponse;
 import com.morpheus.backend.DTO.Download.DownloadManual.ManualDTO;
 import com.morpheus.backend.DTO.Download.DownloadSaida.SaidaDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
-import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
-import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
 import com.morpheus.backend.entity.classifications.ClassificationControl;
 import com.morpheus.backend.repository.classification.ClassificationControlRepository;
 import com.morpheus.backend.service.FieldService;
@@ -25,7 +23,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -36,9 +33,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 

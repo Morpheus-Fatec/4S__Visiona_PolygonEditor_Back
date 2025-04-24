@@ -188,6 +188,7 @@ public class FieldService {
         Long scanID = field.getScanningId();
         List<ClassificationDTO> classifications = classificationAutomaticRepository.getClassificationAutomaticByFieldId(field.getId());
         List<Image> images = imageRepository.getImagesByScanId(scanID);
+        System.out.println("MAMAMAMA " + images);
 
         FarmDTO farmDTO = field.getFarm();
 
@@ -325,7 +326,7 @@ public class FieldService {
         .orElseThrow(() -> new EntityNotFoundException("Talhão não encontrado"));
 
     if (field.getStatus() != Status.APPROVED) {
-        throw new DefaultException("O talhão precisa estar aprovado para gerar o GeoJSON");
+        throw new DefaultException("O talhão precisa estar aprovado para gerar o GeoJSON SAIDA.");
     }
 
     CrsDto crs = new CrsDto();

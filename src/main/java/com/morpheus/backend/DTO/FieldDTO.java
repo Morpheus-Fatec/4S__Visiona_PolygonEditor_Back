@@ -2,6 +2,8 @@ package com.morpheus.backend.DTO;
 
 import java.math.BigDecimal;
 
+import com.morpheus.backend.entity.Scan;
+
 import lombok.Data;
 
 @Data
@@ -21,6 +23,7 @@ public class FieldDTO {
 
     public FieldDTO(
         Long id,
+        Long scanningId,
         String name,
         String farmName,
         String culture,
@@ -34,6 +37,7 @@ public class FieldDTO {
     ) {
         this.id = id;
         this.name = name;
+        this.scanningId = scanningId;
         this.harvest = harvest;
         this.area = area;
         this.soil = soil;
