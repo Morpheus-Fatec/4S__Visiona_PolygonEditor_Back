@@ -188,7 +188,6 @@ public class FieldService {
         Long scanID = field.getScanningId();
         List<ClassificationDTO> classifications = classificationAutomaticRepository.getClassificationAutomaticByFieldId(field.getId());
         List<Image> images = imageRepository.getImagesByScanId(scanID);
-        System.out.println("MAMAMAMA " + images);
 
         FarmDTO farmDTO = field.getFarm();
 

@@ -2,8 +2,6 @@ package com.morpheus.backend.DTO;
 
 import java.math.BigDecimal;
 
-import com.morpheus.backend.entity.Scan;
-
 import lombok.Data;
 
 @Data
