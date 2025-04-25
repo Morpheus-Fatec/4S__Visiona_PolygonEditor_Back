@@ -19,27 +19,28 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "classficacao_automatica")
+@Table(name = "classificacao_manual")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ClassificationAutomatic {
+public class ManualClassification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_classificacao_automatica")
+    @Column(name = "id_classificacao_manual")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "id_controle_classificacao",referencedColumnName = "id_controle_classificacao", nullable = false)
+    @JoinColumn(name = "id_controle_classificacao", referencedColumnName = "id_controle_classificacao", nullable = false)
     private ClassificationControl classificationControl;
-
-    @Column(name = "coordenadas_automatica", columnDefinition = "geometry(MultiPolygon, 4326)")
-    private MultiPolygon coordenadas;
-
+    
     @ManyToOne
     @JoinColumn(name = "id_classe", referencedColumnName = "id_classe", nullable = false)
-    private ClassEntity ClassEntity;
+    private ClassEntity classEntity;
+
+    @Column(name = "coordenadas_manual", columnDefinition = "geometry(MultiPolygon, 4326)")
+    private MultiPolygon coordenadas;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal area;
+
 }

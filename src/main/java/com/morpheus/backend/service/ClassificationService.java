@@ -13,20 +13,24 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
+import com.morpheus.backend.entity.classifications.AutomaticClassification;
 import com.morpheus.backend.entity.classifications.ClassificationControl;
-import com.morpheus.backend.entity.classifications.ClassificationManual;
+import com.morpheus.backend.entity.classifications.ManualClassification;
+import com.morpheus.backend.entity.classifications.RevisionManualClassification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationFeature;
 import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationCollection;
+import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollection;
+import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionFeature;
 import com.morpheus.backend.entity.ClassEntity;
 import com.morpheus.backend.entity.User;
 import com.morpheus.backend.repository.ClassEntityRepository;
 import com.morpheus.backend.repository.UserRepository;
-import com.morpheus.backend.repository.classification.ClassificationAutomaticRepository;
+import com.morpheus.backend.repository.classification.AutomaticClassificationRepository;
 import com.morpheus.backend.repository.classification.ClassificationControlRepository;
-import com.morpheus.backend.repository.classification.ClassificationManualRepository;
+import com.morpheus.backend.repository.classification.ManualClassificationRepository;
+import com.morpheus.backend.repository.classification.RevisionManualClassificationRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -34,10 +38,13 @@ import jakarta.transaction.Transactional;
 public class ClassificationService {
 
     @Autowired
-    private ClassificationAutomaticRepository ClassificationAutomaticRepository;
+    private AutomaticClassificationRepository automaticClassificationRepository;
 
     @Autowired
-    private ClassificationManualRepository classificationManualRepository;
+    private ManualClassificationRepository manualClassificationRepository;
+
+    @Autowired
+    private RevisionManualClassificationRepository revisionManualClassificationRepository;
 
     @Autowired
     private ClassificationControlRepository classificationControlRepository;
@@ -49,8 +56,8 @@ public class ClassificationService {
     private UserRepository userRepository;
 
     @Transactional
-    public void createAutomaticClassification(ClassificationControl control, List<ClassificationDTO> automaticClassificationDTO) throws JsonProcessingException {
-        List<ClassificationAutomatic> automaticClassifications = new ArrayList<>();
+    public void saveAutomaticClassification(ClassificationControl control, List<ClassificationDTO> automaticClassificationDTO) throws JsonProcessingException {
+        List<AutomaticClassification> automaticClassifications = new ArrayList<>();
         Map<String, ClassEntity> classEntityCache = new HashMap<>();
         Set<String> classEntityNames = automaticClassificationDTO.stream()
                 .map(ClassificationDTO::getClassEntity)
@@ -76,7 +83,7 @@ public class ClassificationService {
         }
 
         for (ClassificationDTO classificationDTO : automaticClassificationDTO) {
-            ClassificationAutomatic classificationAutomatic = new ClassificationAutomatic();
+            AutomaticClassification classificationAutomatic = new AutomaticClassification();
             classificationAutomatic.setClassificationControl(control);
             classificationAutomatic.setArea(classificationDTO.getArea());
             classificationAutomatic.setCoordenadas(classificationDTO.convertStringToMultiPolygon());
@@ -84,15 +91,21 @@ public class ClassificationService {
             automaticClassifications.add(classificationAutomatic);
         }
 
-        ClassificationAutomaticRepository.saveAll(automaticClassifications);
+        automaticClassificationRepository.saveAll(automaticClassifications);
     }
 
     @Transactional
-    public void createManualClassification(ManualClassificationCollection manualDTO) throws Exception {
+    public void saveManualClassification(ManualClassificationCollection manualDTO) throws Exception {
         
         ClassificationControl control = classificationControlRepository.findByFieldId(manualDTO.getIdField());
         User userResponsable = userRepository.getUserById(manualDTO.getUserResponsable());
-        Duration duration = Duration.between(manualDTO.getBegin(), manualDTO.getEnd());
+        Duration duration = null;
+        try {
+            duration = Duration.between(manualDTO.getBegin(), manualDTO.getEnd());
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao calcular a duração: " + e.getMessage());
+        }
+        
 
         if (control.getAnalystResponsable() == null) {
             control.setAnalystResponsable(userResponsable);
@@ -110,23 +123,68 @@ public class ClassificationService {
         classificationControlRepository.save(control);
 
 
-        classificationManualRepository.deleteByClassificationControl(control);
-        for (ClassificationFeature feature : manualDTO.getFeatures()) {
-            ClassificationManual manual = new ClassificationManual();
+        manualClassificationRepository.deleteByClassificationControl(control);
+        try {
+            for (ClassificationFeature feature : manualDTO.getFeatures()) {
+                ManualClassification manual = new ManualClassification();
+    
+                manual.setClassificationControl(control);
+                manual.setArea(feature.getProperties().getArea());
+    
+                Optional<ClassEntity> optionalClassEntity = classEntityRepository.findByName(feature.getProperties().getClassEntity());
+    
+                ClassEntity classEntity = optionalClassEntity.orElseThrow(() -> 
+                    new RuntimeException("Classe não encontrada: " + feature.getProperties().getClassEntity())
+                );
+    
+                manual.setClassEntity(classEntity);
+                manual.setCoordenadas(feature.getGeometry().convertStringToMultiPolygon());
+    
+                manualClassificationRepository.save(manual);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao salvar a classificação manual: " + e.getMessage());
+        }
+        
+    }
 
-            manual.setClassificationControl(control);
-            manual.setArea(feature.getProperties().getArea());
+    @Transactional
+    public void saveRevisionClassification(RevisionClassificationCollection revisionClassificationCollection) throws Exception {
+        ClassificationControl control = classificationControlRepository.findByFieldId(revisionClassificationCollection.getIdField());
+        User userResponsable = userRepository.getUserById(revisionClassificationCollection.getUserResponsable());
+        Duration duration = null;
+        try {
+            duration = Duration.between(revisionClassificationCollection.getBegin(), revisionClassificationCollection.getEnd());
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao calcular a duração: " + e.getMessage());
+        }
 
-            Optional<ClassEntity> optionalClassEntity = classEntityRepository.findByName(feature.getProperties().getClassEntity());
+        if (control.getAnalystResponsable() == null) {
+            control.setAnalystResponsable(userResponsable);
+        } else {
+            throw new RuntimeException("é necessário um consultor vinculado.");
+        }
 
-            ClassEntity classEntity = optionalClassEntity.orElseThrow(() -> 
-                new RuntimeException("Classe não encontrada: " + feature.getProperties().getClassEntity())
-            );
+        if (control.getTimeSpentRevision() == null) {
+            control.setTimeSpentRevision(duration);
+        } else {
+            control.setTimeSpentRevision(control.getTimeSpentRevision().plus(duration));
+        }
 
-            manual.setClassEntity(classEntity);
-            manual.setCoordenadas(feature.getGeometry().convertStringToMultiPolygon());
+        classificationControlRepository.save(control);
 
-            classificationManualRepository.save(manual);
+        revisionManualClassificationRepository.deleteByClassificationControl(control);
+
+        try {
+            for (RevisionFeature revision : revisionClassificationCollection.getFeatures()) {
+                RevisionManualClassification revisionEntity = new RevisionManualClassification();
+                revisionEntity.setClassificationControl(control);
+                revisionEntity.setCoordenatiesHighLight(revision.getGeometry().convertStringToMultiPolygon());
+                revisionEntity.setComment(revision.getProperties().getDescription());
+                revisionManualClassificationRepository.save(revisionEntity);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao salvar a classificação manual: " + e.getMessage());
         }
 
     }
