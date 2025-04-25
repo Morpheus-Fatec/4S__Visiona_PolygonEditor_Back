@@ -15,7 +15,7 @@ public class FieldDTO {
     private SoilDTO soil;
     private String name;
     private BigDecimal area;
-    private Float productivity;
+    private String productivity;
     private String status;
     private String coordinates;
 
@@ -23,7 +23,7 @@ public class FieldDTO {
         Long id,
         Long scanningId,
         String name,
-        Float productivity,
+        String productivity,
         String farmName,
         Long cultureId,
         String cultureNome,
@@ -53,7 +53,7 @@ public class FieldDTO {
     public FieldDTO(
         Long id,
         String name,
-        Float productivity,
+        String productivity,
         String farmName,
         Long cultureId,
         String cultureNome,

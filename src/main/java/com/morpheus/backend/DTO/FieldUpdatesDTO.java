@@ -23,6 +23,6 @@ public class FieldUpdatesDTO{
     private String harvest;
     private String status;
     private Soil soil;
-    private Float productivity;
+    private String productivity;
     private Farm farm;
 }

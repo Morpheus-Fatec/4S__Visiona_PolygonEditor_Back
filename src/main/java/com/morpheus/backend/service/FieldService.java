@@ -288,9 +288,6 @@ public class FieldService {
         if (dto.getHarvest() == null || dto.getHarvest().trim().isEmpty()) {
             throw new DefaultException("A safra é obrigatória.");
         }
-        if (dto.getProductivity() == null) {
-            throw new DefaultException("A produtividade é obrigatória.");
-        }
     }
     
     private FieldUpdatesDTO mapToDto(Field field) {

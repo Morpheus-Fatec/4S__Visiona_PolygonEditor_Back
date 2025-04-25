@@ -18,7 +18,7 @@ public class PropertiesDTO {
     private String harvest;
     private String status;
     private SoilDTO soil;
-    private Float productivity;
+    private String productivity;
     private FarmDTO farm;
 }
 
