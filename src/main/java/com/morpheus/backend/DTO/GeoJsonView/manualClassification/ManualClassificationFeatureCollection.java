@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ManualClassificationFeatureCollection {
-    private String type = "FeatureCollection";
     private Long idUserResponsable;
     private Long idField;
     private List<ManualClassificationFeature> features;
