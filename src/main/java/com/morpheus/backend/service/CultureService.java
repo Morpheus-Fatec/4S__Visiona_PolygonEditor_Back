@@ -3,6 +3,7 @@ package com.morpheus.backend.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -14,13 +15,11 @@ import com.morpheus.exceptions.DefaultException;
 @Service
 public class CultureService {
 
-    private final CultureRepository cultureRepository;
-    private final FieldRepository fieldRepository;
+    @Autowired
+    private CultureRepository cultureRepository;
 
-    public CultureService(CultureRepository cultureRepository, FieldRepository fieldRepository) {
-        this.cultureRepository = cultureRepository;
-        this.fieldRepository = fieldRepository;
-    }
+    @Autowired
+    private FieldRepository fieldRepository;
 
     public List<Culture> getAllCultures() {
         List<Culture> cultures = cultureRepository.findAll();
@@ -31,7 +30,8 @@ public class CultureService {
     }
 
     public Culture getCultureById(Long id) {
-        return findCultureOrThrow(id);
+        return Optional.ofNullable(cultureRepository.getCultureById(id))
+                .orElseThrow(() -> new DefaultException("Cultura com ID " + id + " não encontrada."));
     }
 
     public String createCulture(String cultureName) {
@@ -51,7 +51,7 @@ public class CultureService {
             throw new DefaultException("O novo nome da cultura não pode ser vazio ou nulo.");
         }
 
-        Culture culture = findCultureOrThrow(id);
+        Culture culture = getCultureById(id);
         if (fieldRepository.existsByCulture_Name(culture.getName())) {
             throw new DefaultException("Não é possível atualizar o nome da cultura, pois ela está associada a um talhão.");
         }
@@ -63,7 +63,7 @@ public class CultureService {
     }
 
     public String deleteCulture(Long id) {
-        Culture culture = findCultureOrThrow(id);
+        Culture culture = getCultureById(id);
 
         if (fieldRepository.existsByCulture_Name(culture.getName())) {
             throw new DefaultException("Não é possível deletar a cultura, pois ela está associada a um talhão.");
@@ -71,10 +71,5 @@ public class CultureService {
 
         cultureRepository.delete(culture);
         return "Cultura de " + culture.getName() + " deletada com sucesso.";
-    }
-
-    private Culture findCultureOrThrow(Long id) {
-        return Optional.ofNullable(cultureRepository.getCultureById(id))
-                .orElseThrow(() -> new DefaultException("Cultura com ID " + id + " não encontrada."));
     }
 }
