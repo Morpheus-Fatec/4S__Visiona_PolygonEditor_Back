@@ -1,6 +1,7 @@
 package com.morpheus.backend.service;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,9 @@ import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionFeatu
 import com.morpheus.backend.entity.ClassEntity;
 import com.morpheus.backend.entity.User;
 import com.morpheus.backend.repository.ClassEntityRepository;
+import com.morpheus.backend.repository.FieldRepository;
+import com.morpheus.backend.entity.Field;
+import com.morpheus.backend.entity.Status;
 import com.morpheus.backend.repository.UserRepository;
 import com.morpheus.backend.repository.classification.AutomaticClassificationRepository;
 import com.morpheus.backend.repository.classification.ClassificationControlRepository;
@@ -57,6 +61,9 @@ public class ClassificationService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired 
+    private FieldRepository fieldRepository;
 
     public List<ClassificationFeature> getAutomaticClassificationsByFieldId(Long fieldId) {
         List<ClassificationDTO> classifications = automaticClassificationRepository.getAutomaticClassificationByFieldId(fieldId);
@@ -139,7 +146,7 @@ public class ClassificationService {
 
     @Transactional
     public void saveManualClassification(ManualClassificationCollection manualDTO) throws Exception {
-        
+        Field field = fieldRepository.getFieldEntityById(manualDTO.getIdField());
         ClassificationControl control = classificationControlRepository.findByFieldId(manualDTO.getIdField());
         User userResponsable = userRepository.getUserById(manualDTO.getUserResponsable());
         Duration duration = null;
@@ -165,6 +172,8 @@ public class ClassificationService {
         control.setCountManualInteractions(control.getCountManualInteractions() + 1);
         classificationControlRepository.save(control);
 
+        field.setStatus(Status.UNDER_ANALYSIS);
+        fieldRepository.save(field);
 
         manualClassificationRepository.deleteByClassificationControl(control);
         try {
@@ -193,6 +202,7 @@ public class ClassificationService {
 
     @Transactional
     public void saveRevisionClassification(RevisionClassificationCollection revisionClassificationCollection) throws Exception {
+        Field field = fieldRepository.getFieldEntityById(revisionClassificationCollection.getIdField());
         ClassificationControl control = classificationControlRepository.findByFieldId(revisionClassificationCollection.getIdField());
         User userResponsable = userRepository.getUserById(revisionClassificationCollection.getUserResponsable());
         Duration duration = null;
@@ -214,6 +224,14 @@ public class ClassificationService {
             control.setTimeSpentRevision(control.getTimeSpentRevision().plus(duration));
         }
 
+        if (revisionClassificationCollection.getStatus() == Status.APPROVED) {
+            field.setStatus(Status.APPROVED);
+            control.setDateTimeApproved(LocalDateTime.now());
+        }else{
+            field.setStatus(revisionClassificationCollection.getStatus());
+        }
+
+        fieldRepository.save(field);
         classificationControlRepository.save(control);
 
         revisionManualClassificationRepository.deleteByClassificationControl(control);

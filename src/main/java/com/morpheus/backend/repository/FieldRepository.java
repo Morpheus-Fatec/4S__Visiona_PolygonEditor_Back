@@ -35,6 +35,10 @@ public interface FieldRepository extends JpaRepository<Field, Long>{
     """, nativeQuery = true)
     Optional<FieldDTO> getFieldById(@Param("fieldId") Long fieldId);
 
+
+    @Query("SELECT f FROM Field f WHERE f.id = :fieldId")
+    Field getFieldEntityById(Long fieldId);
+
     @Query(value = """
         SELECT 
             t.id_talhao AS id,
