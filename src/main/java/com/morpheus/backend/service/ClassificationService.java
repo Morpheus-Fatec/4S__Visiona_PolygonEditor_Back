@@ -55,6 +55,10 @@ public class ClassificationService {
     @Autowired
     private UserRepository userRepository;
 
+    public List<ClassificationDTO> getAutomaticClassificationByFieldId(Long fieldId) {
+        return automaticClassificationRepository.getAutomaticClassificationByFieldId(fieldId);
+    }
+
     @Transactional
     public void saveAutomaticClassification(ClassificationControl control, List<ClassificationDTO> automaticClassificationDTO) throws JsonProcessingException {
         List<AutomaticClassification> automaticClassifications = new ArrayList<>();
@@ -93,6 +97,10 @@ public class ClassificationService {
 
         automaticClassificationRepository.saveAll(automaticClassifications);
     }
+
+    public List<ClassificationFeature> getManualClassificationByFieldId(Long fieldId) {
+        return manualClassificationRepository.getManualClassificationByFieldId(fieldId);
+    }   
 
     @Transactional
     public void saveManualClassification(ManualClassificationCollection manualDTO) throws Exception {

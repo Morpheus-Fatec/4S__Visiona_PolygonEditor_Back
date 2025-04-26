@@ -38,7 +38,6 @@ import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
-import com.morpheus.backend.repository.classification.AutomaticClassificationRepository;
 import com.morpheus.exceptions.DefaultException;
 
 @Service
@@ -60,7 +59,7 @@ public class FieldService {
     private ImageRepository imageRepository;
 
     @Autowired
-    private AutomaticClassificationRepository automaticClassificationRepository;
+    private ClassificationService classificationService;
 
     public Field createField(CreateFieldDTO fieldDTO, Scan scan){
         try {
@@ -161,7 +160,8 @@ public class FieldService {
     public FeatureCollectionDTO getCompleteFieldById(Long idField) {
         FieldDTO field = fieldRepository.getFieldById(idField).orElseThrow(() -> new DefaultException("Talhão não encontrado."));
         Long scanID = field.getScanningId();
-        List<ClassificationDTO> classifications = automaticClassificationRepository.getAutomaticClassificationByFieldId(field.getId());
+        List<ClassificationDTO> classifications = classificationService.getAutomaticClassificationByFieldId(field.getId());
+        List<ClassificationFeature> manualClassification = classificationService.getManualClassificationByFieldId(field.getId());
         List<Image> images = imageRepository.getImagesByScanId(scanID);
 
         FarmDTO farmDTO = field.getFarm();

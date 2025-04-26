@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.morpheus.backend.DTO.PaginatedFieldResponse;
-import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
+import com.morpheus.backend.DTO.GeoJsonView.AutomaticFeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
 import com.morpheus.backend.service.FieldService;
 
@@ -39,8 +39,8 @@ public class FieldController {
     }
 
     @GetMapping("/featureCollection/{id}")
-    public ResponseEntity<FeatureCollectionDTO> getAllFeatureCollectionDTOByID(@PathVariable Long id) throws IllegalAccessError {
-        FeatureCollectionDTO featureCollectionDTO = fieldService.getCompleteFieldById(id);
+    public ResponseEntity<AutomaticFeatureCollectionDTO> getAllFeatureCollectionDTOByID(@PathVariable Long id) throws IllegalAccessError {
+        AutomaticFeatureCollectionDTO featureCollectionDTO = fieldService.getCompleteFieldById(id);
 
         return ResponseEntity.ok(featureCollectionDTO);
     }
