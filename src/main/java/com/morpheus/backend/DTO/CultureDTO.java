@@ -10,5 +10,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CultureDTO {
-    private String name;
+    private Long id_culture;
+    private String nome;
 }
