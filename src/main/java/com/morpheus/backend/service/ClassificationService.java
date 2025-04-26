@@ -19,8 +19,11 @@ import com.morpheus.backend.entity.classifications.ManualClassification;
 import com.morpheus.backend.entity.classifications.RevisionManualClassification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.ClassificationDTO;
+import com.morpheus.backend.DTO.GeoJsonView.GeometryDTO;
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationFeature;
+import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationProperties;
 import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationCollection;
+import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeature;
 import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollection;
 import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionFeature;
 import com.morpheus.backend.entity.ClassEntity;
@@ -55,8 +58,24 @@ public class ClassificationService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<ClassificationDTO> getAutomaticClassificationByFieldId(Long fieldId) {
-        return automaticClassificationRepository.getAutomaticClassificationByFieldId(fieldId);
+    public List<ClassificationFeature> getAutomaticClassificationsByFieldId(Long fieldId) {
+        List<ClassificationDTO> classifications = automaticClassificationRepository.getAutomaticClassificationByFieldId(fieldId);
+            List<ClassificationFeature> classificationDTOs = classifications.stream().map(classification -> {
+            ClassificationFeature classificationDTO = new ClassificationFeature();
+            ClassificationProperties classificationProperties = new ClassificationProperties(classification.getId(), classification.getArea(), classification.getClassEntity());
+            GeometryDTO classificationGeometry = new GeometryDTO();
+            try {
+                classificationGeometry.convertToGeoJson(classification.getCoordinates());
+            } catch (JsonProcessingException e) {
+
+                e.printStackTrace();
+            }
+            classificationDTO.setProperties(classificationProperties);
+            classificationDTO.setGeometry(classificationGeometry);
+            return classificationDTO;
+        }).collect(Collectors.toList());
+
+        return classificationDTOs;
     }
 
     @Transactional
@@ -98,8 +117,24 @@ public class ClassificationService {
         automaticClassificationRepository.saveAll(automaticClassifications);
     }
 
-    public List<ClassificationFeature> getManualClassificationByFieldId(Long fieldId) {
-        return manualClassificationRepository.getManualClassificationByFieldId(fieldId);
+    public List<ManualClassificationFeature> getManualClassificationByFieldId(Long fieldId) {
+        List<ClassificationDTO> manual = manualClassificationRepository.getManualClassificationByFieldId(fieldId);
+
+        List<ManualClassificationFeature> manualDTOs = manual.stream().map(manualClassification -> {
+            ManualClassificationFeature manualDTO = new ManualClassificationFeature();
+            ClassificationProperties classificationProperties = new ClassificationProperties(manualClassification.getId(), manualClassification.getArea(), manualClassification.getClassEntity());
+            GeometryDTO classificationGeometry = new GeometryDTO();
+            try {
+                classificationGeometry.convertToGeoJson(manualClassification.getCoordinates());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            manualDTO.setProperties(classificationProperties);
+            manualDTO.setGeometry(classificationGeometry);
+            return manualDTO;
+        }).collect(Collectors.toList());
+        return manualDTOs;
+        
     }   
 
     @Transactional

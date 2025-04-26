@@ -11,7 +11,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.FieldDTO;
@@ -25,7 +24,8 @@ import com.morpheus.backend.DTO.GeoJsonView.ImageViewDTO;
 import com.morpheus.backend.DTO.GeoJsonView.PropertiesDTO;
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationColletion;
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationFeature;
-import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationProperties;
+import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeature;
+import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
 import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.entity.Farm;
 import com.morpheus.backend.entity.Field;
@@ -160,8 +160,8 @@ public class FieldService {
     public FeatureCollectionDTO getCompleteFieldById(Long idField) {
         FieldDTO field = fieldRepository.getFieldById(idField).orElseThrow(() -> new DefaultException("Talhão não encontrado."));
         Long scanID = field.getScanningId();
-        List<ClassificationDTO> classifications = classificationService.getAutomaticClassificationByFieldId(field.getId());
-        List<ClassificationFeature> manualClassification = classificationService.getManualClassificationByFieldId(field.getId());
+        List<ClassificationFeature> Automaticclassifications = classificationService.getAutomaticClassificationsByFieldId(field.getId());
+        List<ManualClassificationFeature> manualClassification = classificationService.getManualClassificationByFieldId(field.getId());
         List<Image> images = imageRepository.getImagesByScanId(scanID);
 
         FarmDTO farmDTO = field.getFarm();
@@ -183,22 +183,6 @@ public class FieldService {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        
-        List<ClassificationFeature> classificationDTOs = classifications.stream().map(classification -> {
-            ClassificationFeature classificationDTO = new ClassificationFeature();
-            ClassificationProperties classificationProperties = new ClassificationProperties(classification.getId(), classification.getArea(), classification.getClassEntity());
-            GeometryDTO classificationGeometry = new GeometryDTO();
-            try {
-                classificationGeometry.convertToGeoJson(classification.getCoordinates());
-            } catch (JsonProcessingException e) {
-
-                e.printStackTrace();
-            }
-            classificationDTO.setProperties(classificationProperties);
-            classificationDTO.setGeometry(classificationGeometry);
-            return classificationDTO;
-        }).collect(Collectors.toList());
-
 
         List<ImageViewDTO> imageDTOs = images.stream().map(image -> {
             ImageViewDTO imageDTO = new ImageViewDTO();
@@ -207,19 +191,11 @@ public class FieldService {
             return imageDTO;
         }).collect(Collectors.toList());
 
-        FieldFeatureDTO fieldFeatureDTO = new FieldFeatureDTO();
-        fieldFeatureDTO.setProperties(properties);
-        fieldFeatureDTO.setGeometry(geometry);
-        fieldFeatureDTO.setImages(imageDTOs);
 
-        ClassificationColletion classificationCollection = new ClassificationColletion();
-        classificationCollection.setFeatures(classificationDTOs);
-        fieldFeatureDTO.setClassification(classificationCollection);
-        
-
-        // Criando e retornando o FeatureCollectionDTO corretamente
-        FeatureCollectionDTO featureCollection = new FeatureCollectionDTO();
-        featureCollection.setFeatures(fieldFeatureDTO);
+        ClassificationColletion AutomaticCollection = new ClassificationColletion(Automaticclassifications);
+        ManualClassificationFeatureCollection manualCollection= new ManualClassificationFeatureCollection(manualClassification);
+        FieldFeatureDTO fieldFeatureDTO = new FieldFeatureDTO(properties, geometry, imageDTOs, AutomaticCollection, manualCollection);
+        FeatureCollectionDTO featureCollection = new FeatureCollectionDTO(fieldFeatureDTO);
         
         return featureCollection;
     }
