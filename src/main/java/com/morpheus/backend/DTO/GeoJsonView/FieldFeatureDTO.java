@@ -22,11 +22,10 @@ public class FieldFeatureDTO {
     private List<ImageViewDTO> images;
 
 
-    public FieldFeatureDTO(PropertiesDTO properties, GeometryDTO geometry, List<ImageViewDTO> images, ClassificationColletion automatic, ManualClassificationFeatureCollection manual) {
+    public FieldFeatureDTO(PropertiesDTO properties, GeometryDTO geometry, List<ImageViewDTO> images, ClassificationColletion automatic) {
         this.properties = properties;
         this.geometry = geometry;
         this.images = images;
         this.automatic = automatic;
-        this.manual = manual;
     }
 }

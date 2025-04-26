@@ -15,12 +15,12 @@ public interface RevisionManualClassificationRepository extends JpaRepository<Re
 
     @Query(value = """
         SELECT 
-            ca.id_classificacao_automatica AS id,
-            ST_AsGeoJSON(ca.coordenadas_destaque) AS coordinates,
-            ca.comentario AS comment
+            rca.id_controle_classificacao AS id,
+            ST_AsGeoJSON(rca.coordenadas_destaque) AS coordinates,
+            rca.comentario AS comment
         FROM 
             controle_classificacao cc
-        JOIN classificacao_automatica ca ON cc.id_controle_classificacao = ca.id_controle_classificacao
+        JOIN revisao_classificacao_manual rca ON cc.id_controle_classificacao = rca.id_controle_classificacao
         WHERE 
             cc.id_talhao = :fieldId
         """, nativeQuery = true)

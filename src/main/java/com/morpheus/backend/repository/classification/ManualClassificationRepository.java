@@ -14,14 +14,14 @@ public interface ManualClassificationRepository extends JpaRepository<ManualClas
 
     @Query(value = """
         SELECT 
-            ca.id_classificacao_automatica AS id,
-            ca.area AS area,
-            ST_AsGeoJSON(ca.coordenadas_automatica) AS coordinates,
+            cm.id_classificacao_manual AS id,
+            cm.area AS area,
+            ST_AsGeoJSON(cm.coordenadas_manual) AS coordinates,
             c.nome as classEntity
         FROM 
             controle_classificacao cc
-        JOIN classificacao_automatica ca ON cc.id_controle_classificacao = ca.id_controle_classificacao
-        JOIN classes c ON ca.id_classe = c.id_classe
+        JOIN classificacao_manual cm ON cc.id_controle_classificacao = cm.id_controle_classificacao
+        JOIN classes c ON cm.id_classe = c.id_classe
         WHERE 
             cc.id_talhao = :fieldId
         """, nativeQuery = true)
