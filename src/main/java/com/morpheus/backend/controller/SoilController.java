@@ -35,12 +35,12 @@ public class SoilController {
 
     @PostMapping("/createSoil")
     public String createSoil(@RequestBody SoilDTO soilName) {
-        return soilService.createSoil(soilName.getName());
+        return soilService.createSoil(soilName.getNome());
     }
 
     @PutMapping("/updateSoil/{id}")
     public String updateSoil(@PathVariable Long id, @RequestBody SoilDTO soilName) {
-        return soilService.updateSoil(id, soilName.getName());
+        return soilService.updateSoil(id, soilName.getNome());
     }
 
     @DeleteMapping("/{id}")

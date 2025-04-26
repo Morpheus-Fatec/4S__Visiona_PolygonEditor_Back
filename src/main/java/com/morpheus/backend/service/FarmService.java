@@ -70,18 +70,22 @@ public class FarmService {
             if (farm == null) {
                 throw new DefaultException("Fazenda com o ID " + farmId + " não encontrada.");
             }
-            if (farmDTO.getFarmName() == null || farmDTO.getFarmState() == null || farmDTO.getFarmCity() == null) {
-                throw new DefaultException("Fazenda não pode ser atualizada com valores nulos.");
+    
+            if (farmDTO.getFarmName() == null || farmDTO.getFarmName().trim().isEmpty() ||
+                farmDTO.getFarmState() == null || farmDTO.getFarmState().trim().isEmpty() ||
+                farmDTO.getFarmCity() == null || farmDTO.getFarmCity().trim().isEmpty()) {
+                throw new DefaultException("Fazenda não pode ser atualizada com valores nulos ou vazios.");
             }
+    
             String oldFarmName = farm.getFarmName();
             String oldFarmState = farm.getFarmState();
             String oldFarmCity = farm.getFarmCity();
-
+    
             farm.setFarmName(farmDTO.getFarmName());
             farm.setFarmState(farmDTO.getFarmState());
             farm.setFarmCity(farmDTO.getFarmCity());
             farmRepository.save(farm);
-
+    
             return String.format(
                 "Fazenda alterada de Nome: %s, Estado: %s, Cidade: %s para Nome: %s, Estado: %s, Cidade: %s",
                 oldFarmName, oldFarmState, oldFarmCity,

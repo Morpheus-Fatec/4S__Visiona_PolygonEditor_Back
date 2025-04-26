@@ -27,5 +27,9 @@ public interface ManualClassificationRepository extends JpaRepository<ManualClas
         """, nativeQuery = true)
     List<ClassificationDTO> getManualClassificationByFieldId(Long fieldId);
 
+
+    List<ManualClassification> findByClassificationControl(ClassificationControl control);
+
     void deleteByClassificationControl(ClassificationControl control);
+
 }

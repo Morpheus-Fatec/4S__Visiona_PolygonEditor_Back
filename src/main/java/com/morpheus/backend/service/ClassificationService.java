@@ -297,6 +297,10 @@ public class ClassificationService {
         } catch (Exception e) {
             throw new RuntimeException("Erro ao salvar a classificação manual: " + e.getMessage());
         }
+    }
 
+    public List<ManualClassification> findByClassificationControl (ClassificationControl control){
+        List<ManualClassification> manual = manualClassificationRepository.findByClassificationControl(control);
+        return manual;
     }
 }

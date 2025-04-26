@@ -35,12 +35,12 @@ public class CultureController {
 
     @PostMapping("/createCulture")
     public String createCulture(@RequestBody CultureDTO culture) {
-        return cultureService.createCulture(culture.getName());
+        return cultureService.createCulture(culture.getNome());
     }
 
     @PutMapping("/updateCulture/{id}")
     public String updateCulture(@PathVariable Long id, @RequestBody CultureDTO culture) {
-        return cultureService.updateCulture(id, culture.getName());
+        return cultureService.updateCulture(id, culture.getNome());
     }
 
     @DeleteMapping("/{id}")
