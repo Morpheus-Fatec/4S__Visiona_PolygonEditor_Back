@@ -31,7 +31,7 @@ public class CreateFieldDTO implements Converter {
     private String nameField;
     @NotNull(message = "Farm não pode ser nulo.")
     private String nameFarm;
-    private Float productivity;
+    private String productivity;
     private String soil;
     private List<ClassificationDTO> classification;
 

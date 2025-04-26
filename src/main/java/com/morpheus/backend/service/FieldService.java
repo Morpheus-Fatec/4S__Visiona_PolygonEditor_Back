@@ -1,6 +1,7 @@
 package com.morpheus.backend.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,9 +14,20 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
+import com.morpheus.backend.DTO.CultureDTO;
 import com.morpheus.backend.DTO.FarmDTO;
 import com.morpheus.backend.DTO.FieldDTO;
+import com.morpheus.backend.DTO.FieldUpdatesDTO;
 import com.morpheus.backend.DTO.PaginatedFieldResponse;
+import com.morpheus.backend.DTO.SoilDTO;
+import com.morpheus.backend.DTO.Download.DownloadManual.FeatureManualDto;
+import com.morpheus.backend.DTO.Download.DownloadManual.FieldPropertiesManualDto;
+import com.morpheus.backend.DTO.Download.DownloadManual.ManualDTO;
+import com.morpheus.backend.DTO.Download.DownloadSaida.CrsDto;
+import com.morpheus.backend.DTO.Download.DownloadSaida.FeaturesDto;
+import com.morpheus.backend.DTO.Download.DownloadSaida.FieldPropertiesDto;
+import com.morpheus.backend.DTO.Download.DownloadSaida.GeometryDto;
+import com.morpheus.backend.DTO.Download.DownloadSaida.SaidaDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionSimpleDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
@@ -33,16 +45,37 @@ import com.morpheus.backend.entity.Image;
 import com.morpheus.backend.entity.Scan;
 import com.morpheus.backend.entity.Soil;
 import com.morpheus.backend.entity.Status;
+import com.morpheus.backend.entity.classifications.ClassificationControl;
+import com.morpheus.backend.entity.classifications.ClassificationManual;
 import com.morpheus.backend.repository.CultureRepository;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
+import com.morpheus.backend.utilities.ConverterToMultipolygon;
 import com.morpheus.backend.repository.classification.ClassificationAutomaticRepository;
+import com.morpheus.backend.repository.classification.ClassificationControlRepository;
 import com.morpheus.exceptions.DefaultException;
+
+import jakarta.persistence.EntityNotFoundException;
 
 @Service
 public class FieldService {
+
+    @Autowired
+    ConverterToMultipolygon converterToMultipolygon;
+
+    @Autowired
+    FarmService farmService;
+
+    @Autowired
+    SoilService soilService;
+    
+    @Autowired
+    CultureService cultureService;
+
+    @Autowired
+    private ClassificationService classificationService;
 
     @Autowired
     private FieldRepository fieldRepository;
@@ -58,6 +91,9 @@ public class FieldService {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private ClassificationControlRepository classificationControlRepo;
 
     @Autowired
     private ClassificationAutomaticRepository classificationAutomaticRepository;
@@ -124,9 +160,9 @@ public class FieldService {
             properties.setId((Long) ((Number) obj.getId()));
             properties.setName((String) obj.getName());
             properties.setFarm(farmDTO);
-            properties.setCulture((String) obj.getCulture());
+            properties.setCulture((CultureDTO) obj.getCulture());
             properties.setArea((BigDecimal) obj.getArea());
-            properties.setSoil((String) obj.getSoil());
+            properties.setSoil((SoilDTO) obj.getSoil());
             properties.setHarvest((String) obj.getHarvest());
             Status statusProp = Status.valueOf(((String) obj.getStatus()).toUpperCase()); 
             properties.setStatus(statusProp.getPortugueseValue());
@@ -223,4 +259,134 @@ public class FieldService {
         
         return featureCollection;
     }
+
+    public FieldUpdatesDTO updateField(Long id, FieldUpdatesDTO dto) {
+        Field field = fieldRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Talhão não encontrado!"));
+
+        validate(dto);
+    
+        field.setName(dto.getName());
+        field.setHarvest(dto.getHarvest());
+        field.setProductivity(dto.getProductivity());
+    
+        if (dto.getFarm() != null) {
+            Farm farm = dto.getFarm();
+            FarmDTO farmDTO = new FarmDTO(farm.getFarmName(), farm.getFarmCity(), farm.getFarmState(), farm.getId());
+            farmService.updateFarm(farm.getId(), farmDTO);
+        }
+        
+        if (dto.getSoil() != null) {
+            soilService.updateSoil(dto.getSoil().getId(), dto.getSoil().getName());
+        }
+        
+        if (dto.getCulture() != null) {
+            cultureService.updateCulture(dto.getCulture().getId(), dto.getCulture().getName());
+        }
+    
+        Field updatedField = fieldRepository.save(field);
+
+        return mapToDto(updatedField);
+    }
+    
+
+    private void validate(FieldUpdatesDTO dto) {
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            throw new DefaultException("O nome do Talhão é obrigatório.");
+        }
+        if (dto.getHarvest() == null || dto.getHarvest().trim().isEmpty()) {
+            throw new DefaultException("A safra é obrigatória.");
+        }
+    }
+    
+    private FieldUpdatesDTO mapToDto(Field field) {
+        FieldUpdatesDTO dto = new FieldUpdatesDTO();
+        dto.setId(field.getId());
+        dto.setName(field.getName());
+        dto.setArea(field.getArea());
+        dto.setHarvest(field.getHarvest());
+        dto.setStatus(field.getStatus().toString());
+        dto.setProductivity(field.getProductivity());
+    
+        Farm farm = new Farm();
+        farm.setId(field.getFarm().getId());
+        farm.setFarmName(field.getFarm().getFarmName());
+        farm.setFarmCity(field.getFarm().getFarmCity());
+        farm.setFarmState(field.getFarm().getFarmState());
+        dto.setFarm(farm);
+
+        Culture culture = new Culture();
+        culture.setId(field.getCulture().getId());
+        culture.setName(field.getCulture().getName());
+        dto.setCulture(culture);
+
+        Soil soil = new Soil();
+        soil.setId(field.getSoil().getId());
+        soil.setName(field.getSoil().getName());
+        dto.setSoil(soil);
+    
+        return dto;
+    }
+
+    public SaidaDTO gerarGeoJsonPorId(Long fieldId) {
+    Field field = fieldRepository.findById(fieldId)
+        .orElseThrow(() -> new EntityNotFoundException("Talhão não encontrado"));
+
+    if (field.getStatus() != Status.APPROVED) {
+        throw new DefaultException("O talhão precisa estar aprovado para gerar o GeoJSON SAIDA.");
+    }
+
+    CrsDto crs = new CrsDto();
+
+    FieldPropertiesDto propertiesDto = new FieldPropertiesDto(
+        field.getName(), 
+        field.getArea(), 
+        field.getSoil().getName(),
+        field.getCulture().getName(),
+        field.getHarvest(),
+        field.getFarm().getFarmName()
+    );
+
+    List<List<List<List<Double>>>> multipolygon = converterToMultipolygon.converterToMultiPolygon(field.getCoordinates());
+
+
+    GeometryDto geometryDto = new GeometryDto(multipolygon);;
+    FeaturesDto featureDto = new FeaturesDto(propertiesDto, geometryDto);
+
+    return new SaidaDTO(crs, featureDto);
+    }
+
+    public ManualDTO gerarGeoJsonPorIdManual(Long fielId) {
+        ClassificationControl control = classificationControlRepo.findByFieldId(fielId);
+        
+        List<ClassificationManual> manualClassificationList = classificationService.findByClassificationControl(control);
+        
+        if (manualClassificationList.isEmpty()) {
+            throw new EntityNotFoundException("Classificação automatica não encontrada");
+        }
+
+        CrsDto crs = new CrsDto();
+
+        List<FeatureManualDto> features = new ArrayList<>();
+
+        for (ClassificationManual manual : manualClassificationList) {
+            FieldPropertiesManualDto propertiesManualDto = new FieldPropertiesManualDto(
+                manual.getClassificationControl().getField().getName(),
+                manual.getArea(),
+                manual.getClassEntity().getName()   
+            );
+
+            List<List<List<List<Double>>>> multipolygon = converterToMultipolygon.converterToMultiPolygon(manual.getCoordenadas());
+
+            GeometryDto geometryDto = new GeometryDto(multipolygon);
+
+            FeatureManualDto featureManualDto = new FeatureManualDto(propertiesManualDto, geometryDto);
+
+            features.add(featureManualDto);
+        }
+
+        return new ManualDTO(crs, features);
+    }
+
+
 }
