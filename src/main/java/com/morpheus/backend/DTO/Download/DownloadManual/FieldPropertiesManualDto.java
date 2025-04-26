@@ -6,26 +6,25 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({
-    "CLASSE",
-    "AREA_M2",
     "NM_TL",
+    "AREA_M2",
+    "CLASSE",
 })
 public class FieldPropertiesManualDto {
-
-    @JsonProperty("CLASSE")
-    private String classe;
-
-    @JsonProperty("AREA_M2")
-    private BigDecimal area;
 
     @JsonProperty("NM_TL")
     private String fieldName;
 
+    @JsonProperty("AREA_M2")
+    private BigDecimal area;   
 
-    public FieldPropertiesManualDto(String classe, BigDecimal area, String fieldName) {
-        this.classe = classe;
-        this.area = area;
+    @JsonProperty("CLASSE")
+    private String classe;
+
+    public FieldPropertiesManualDto(String fieldName, BigDecimal area, String classe){
         this.fieldName = fieldName;
+        this.area = area;
+        this.classe = classe;
     }
     
     public String getClasse() {

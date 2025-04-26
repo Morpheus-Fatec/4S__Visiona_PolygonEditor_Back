@@ -128,6 +128,10 @@ public class ClassificationService {
 
             classificationManualRepository.save(manual);
         }
+    }
 
+    public List<ClassificationManual> findByClassificationControl (ClassificationControl control){
+        List<ClassificationManual> manual = classificationManualRepository.findByClassificationControl(control);
+        return manual;
     }
 }

@@ -1,6 +1,7 @@
 package com.morpheus.backend.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,8 @@ import com.morpheus.backend.entity.Image;
 import com.morpheus.backend.entity.Scan;
 import com.morpheus.backend.entity.Soil;
 import com.morpheus.backend.entity.Status;
-import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
+import com.morpheus.backend.entity.classifications.ClassificationControl;
+import com.morpheus.backend.entity.classifications.ClassificationManual;
 import com.morpheus.backend.repository.CultureRepository;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
@@ -52,6 +54,7 @@ import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
 import com.morpheus.backend.utilities.ConverterToMultipolygon;
 import com.morpheus.backend.repository.classification.ClassificationAutomaticRepository;
+import com.morpheus.backend.repository.classification.ClassificationControlRepository;
 import com.morpheus.exceptions.DefaultException;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -72,6 +75,9 @@ public class FieldService {
     CultureService cultureService;
 
     @Autowired
+    private ClassificationService classificationService;
+
+    @Autowired
     private FieldRepository fieldRepository;
     
     @Autowired
@@ -85,6 +91,9 @@ public class FieldService {
 
     @Autowired
     private ImageRepository imageRepository;
+
+    @Autowired
+    private ClassificationControlRepository classificationControlRepo;
 
     @Autowired
     private ClassificationAutomaticRepository classificationAutomaticRepository;
@@ -347,30 +356,37 @@ public class FieldService {
     return new SaidaDTO(crs, featureDto);
     }
 
-    public ManualDTO gerarGeoJsonPorIdManual(Long fielId){
-        ClassificationAutomatic classificationAutomatic = classificationAutomaticRepository.findById(fielId)
-        .orElseThrow(() -> new EntityNotFoundException("Talhão não encontrado"));
-
-        Field field = classificationAutomatic.getClassificationControl().getField();
-
-        if (field.getStatus() != Status.APPROVED) {
-            throw new DefaultException("O talhão precisa estar aprovado para gerar o GeoJSON");
+    public ManualDTO gerarGeoJsonPorIdManual(Long fielId) {
+        ClassificationControl control = classificationControlRepo.findByFieldId(fielId);
+        
+        List<ClassificationManual> manualClassificationList = classificationService.findByClassificationControl(control);
+        
+        if (manualClassificationList.isEmpty()) {
+            throw new EntityNotFoundException("Classificação automatica não encontrada");
         }
 
         CrsDto crs = new CrsDto();
 
-        FieldPropertiesManualDto propertiesManualDto = new FieldPropertiesManualDto(
-            classificationAutomatic.getClassEntity().getName(),
-            classificationAutomatic.getArea(),
-            classificationAutomatic.getClassificationControl().getField().getName());
+        List<FeatureManualDto> features = new ArrayList<>();
 
-        List<List<List<List<Double>>>> multipolygon = converterToMultipolygon.converterToMultiPolygon(classificationAutomatic.getCoordenadas());
+        for (ClassificationManual manual : manualClassificationList) {
+            FieldPropertiesManualDto propertiesManualDto = new FieldPropertiesManualDto(
+                manual.getClassificationControl().getField().getName(),
+                manual.getArea(),
+                manual.getClassEntity().getName()   
+            );
 
-        GeometryDto geometryDto = new GeometryDto(multipolygon);;
-        FeatureManualDto featureManualDto = new FeatureManualDto(propertiesManualDto, geometryDto);
-    
-        return new ManualDTO(crs, featureManualDto);
+            List<List<List<List<Double>>>> multipolygon = converterToMultipolygon.converterToMultiPolygon(manual.getCoordenadas());
 
+            GeometryDto geometryDto = new GeometryDto(multipolygon);
+
+            FeatureManualDto featureManualDto = new FeatureManualDto(propertiesManualDto, geometryDto);
+
+            features.add(featureManualDto);
+        }
+
+        return new ManualDTO(crs, features);
     }
+
 
 }

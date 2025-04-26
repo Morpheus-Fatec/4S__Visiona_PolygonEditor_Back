@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.entity.classifications.ClassificationAutomatic;
+import com.morpheus.backend.entity.classifications.ClassificationControl;
 
 public interface ClassificationAutomaticRepository extends JpaRepository<ClassificationAutomatic, Long>{
 
@@ -24,5 +25,7 @@ public interface ClassificationAutomaticRepository extends JpaRepository<Classif
             cc.id_talhao = :fieldId
         """, nativeQuery = true)
     List<ClassificationDTO> getClassificationAutomaticByFieldId(Long fieldId);
+
+    List<ClassificationAutomatic> findByClassificationControl(ClassificationControl control);
 
 }
