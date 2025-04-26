@@ -30,7 +30,7 @@ public class FarmService {
     }
 
     public Farm getFarmById(Long id) {
-        return findFarmOrThrow(id);
+        return farmRepository.findById(id).orElseThrow(() -> new DefaultException("Fazenda com o ID " + id + " não encontrada."));
     }
 
     public String createFarm(FarmDTO farmDTO) {
@@ -48,7 +48,7 @@ public class FarmService {
     public String updateFarm(Long farmId, FarmDTO farmDTO) {
         validateFarmDTO(farmDTO);
 
-        Farm farm = findFarmOrThrow(farmId);
+        Farm farm = getFarmById(farmId);
         String oldFarmName = farm.getFarmName();
         String oldFarmState = farm.getFarmState();
         String oldFarmCity = farm.getFarmCity();
@@ -75,7 +75,7 @@ public class FarmService {
     }
 
     private String updateFarmField(Long farmId, String newFieldValue, String fieldType) {
-        Farm farm = findFarmOrThrow(farmId);
+        Farm farm = getFarmById(farmId);
 
         if (!StringUtils.hasText(newFieldValue)) {
             throw new DefaultException("O " + fieldType + " da fazenda não pode estar vazio.");
@@ -103,7 +103,7 @@ public class FarmService {
     }
 
     public String deleteFarmById(Long id) {
-        Farm farm = findFarmOrThrow(id);
+        Farm farm = getFarmById(id);
 
         if (fieldRepository.existsByFarm_FarmName(farm.getFarmName())) {
             throw new DefaultException("A fazenda está relacionada a um ou mais talhões e não pode ser excluída.");
@@ -119,9 +119,5 @@ public class FarmService {
         if (farmDTO == null || !StringUtils.hasText(farmDTO.getFarmName()) || !StringUtils.hasText(farmDTO.getFarmState()) || !StringUtils.hasText(farmDTO.getFarmCity())) {
             throw new DefaultException("Todos os campos de fazenda são obrigatórios.");
         }
-    }
-
-    private Farm findFarmOrThrow(Long id) {
-        return farmRepository.findById(id).orElseThrow(() -> new DefaultException("Fazenda com o ID " + id + " não encontrada."));
     }
 }
