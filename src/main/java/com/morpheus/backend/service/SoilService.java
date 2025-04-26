@@ -1,6 +1,8 @@
 package com.morpheus.backend.service;
 
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -9,18 +11,14 @@ import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.backend.repository.SoilRepository;
 import com.morpheus.exceptions.DefaultException;
 
-import ch.qos.logback.core.util.StringUtil;
-
 @Service
 public class SoilService {
 
-    private final SoilRepository soilRepository;
-    private final FieldRepository fieldRepository;
+    @Autowired
+    private SoilRepository soilRepository;
 
-    public SoilService(SoilRepository soilRepository, FieldRepository fieldRepository) {
-        this.soilRepository = soilRepository;
-        this.fieldRepository = fieldRepository;
-    }
+    @Autowired
+    private FieldRepository fieldRepository;
 
     public List<Soil> getAllSoils() {
         List<Soil> soils = soilRepository.findAll();
@@ -52,7 +50,7 @@ public class SoilService {
                 throw new DefaultException("O nome do solo é obrigatório.");
             }
 
-            Soil soil = findSoilOrThrow(id);
+            Soil soil = getSoilById(id);
             if (soil == null) {
                 throw new DefaultException("Tipo de solo com ID " + id + " não encontrado.");
             }
@@ -64,7 +62,7 @@ public class SoilService {
     }
 
     public String deleteSoilById(Long id) {
-            Soil soil = findSoilOrThrow(id);
+            Soil soil = getSoilById(id);
 
             if (fieldRepository.existsBySoil_Name(soil.getName())) {
                 throw new DefaultException("Não é possível deletar o solo, pois ele está associado a um talhão.");
@@ -72,10 +70,4 @@ public class SoilService {
             soilRepository.delete(soil);
             return "Tipo de solo '" + soil.getName() + "' deletado com sucesso.";
     }
-
-    private Soil findSoilOrThrow(Long id) {
-        return soilRepository.findById(id)
-            .orElseThrow(() -> new DefaultException("Tipo de solo com ID " + id + " não encontrado."));
-        }
-    
 }
