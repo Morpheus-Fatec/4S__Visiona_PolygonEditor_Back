@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationColletion;
 import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
+import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollectionOut;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +20,7 @@ public class FieldFeatureDTO {
     private GeometryDTO geometry;
     private ClassificationColletion automatic;
     private ManualClassificationFeatureCollection manual;
+    private RevisionClassificationCollectionOut revision;
     private List<ImageViewDTO> images;
 
 

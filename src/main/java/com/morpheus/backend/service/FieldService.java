@@ -24,8 +24,6 @@ import com.morpheus.backend.DTO.GeoJsonView.ImageViewDTO;
 import com.morpheus.backend.DTO.GeoJsonView.PropertiesDTO;
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationColletion;
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationFeature;
-import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeature;
-import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
 import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.entity.Farm;
 import com.morpheus.backend.entity.Field;
@@ -157,46 +155,44 @@ public class FieldService {
             );
         }
     
-    public FeatureCollectionDTO getCompleteFieldById(Long idField) {
-        FieldDTO field = fieldRepository.getFieldById(idField).orElseThrow(() -> new DefaultException("Talhão não encontrado."));
-        Long scanID = field.getScanningId();
-        List<ClassificationFeature> Automaticclassifications = classificationService.getAutomaticClassificationsByFieldId(field.getId());
-        List<ManualClassificationFeature> manualClassification = classificationService.getManualClassificationByFieldId(field.getId());
-        List<Image> images = imageRepository.getImagesByScanId(scanID);
-
-        FarmDTO farmDTO = field.getFarm();
-
-        PropertiesDTO properties = new PropertiesDTO();
-        properties.setId(field.getId());
-        properties.setName(field.getName());
-        properties.setArea(field.getArea());
-        properties.setCulture(field.getCulture());
-        properties.setHarvest(field.getHarvest());
-        Status statusProp = Status.valueOf(((String) field.getStatus()).toUpperCase()); 
-        properties.setStatus(statusProp.getPortugueseValue());
-        properties.setSoil(field.getSoil());
-        properties.setFarm(farmDTO);
-
-        GeometryDTO geometry = new GeometryDTO();
-        try{
-            geometry.convertToGeoJson(field.getCoordinates());
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+        public FeatureCollectionDTO getCompleteFieldById(Long idField) {
+            FieldDTO field = fieldRepository.getFieldById(idField).orElseThrow(() -> new DefaultException("Talhão não encontrado."));
+            Long scanID = field.getScanningId();
+            List<ClassificationFeature> Automaticclassifications = classificationService.getAutomaticClassificationsByFieldId(field.getId());
+            List<Image> images = imageRepository.getImagesByScanId(scanID);
+    
+            FarmDTO farmDTO = field.getFarm();
+    
+            PropertiesDTO properties = new PropertiesDTO();
+            properties.setId(field.getId());
+            properties.setName(field.getName());
+            properties.setArea(field.getArea());
+            properties.setCulture(field.getCulture());
+            properties.setHarvest(field.getHarvest());
+            Status statusProp = Status.valueOf(((String) field.getStatus()).toUpperCase()); 
+            properties.setStatus(statusProp.getPortugueseValue());
+            properties.setSoil(field.getSoil());
+            properties.setFarm(farmDTO);
+    
+            GeometryDTO geometry = new GeometryDTO();
+            try {
+                geometry.convertToGeoJson(field.getCoordinates().toString());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+    
+            List<ImageViewDTO> imageDTOs = images.stream().map(image -> {
+                ImageViewDTO imageDTO = new ImageViewDTO();
+                imageDTO.setName(image.getName());
+                imageDTO.setLink(image.getAddress());
+                return imageDTO;
+            }).collect(Collectors.toList());
+    
+    
+            ClassificationColletion AutomaticCollection = new ClassificationColletion(Automaticclassifications);
+            FieldFeatureDTO fieldFeatureDTO = new FieldFeatureDTO(properties, geometry, imageDTOs, AutomaticCollection);
+            FeatureCollectionDTO featureCollection = new FeatureCollectionDTO(fieldFeatureDTO);
+            
+            return featureCollection;
         }
-
-        List<ImageViewDTO> imageDTOs = images.stream().map(image -> {
-            ImageViewDTO imageDTO = new ImageViewDTO();
-            imageDTO.setName(image.getName());
-            imageDTO.setLink(image.getAddress());
-            return imageDTO;
-        }).collect(Collectors.toList());
-
-
-        ClassificationColletion AutomaticCollection = new ClassificationColletion(Automaticclassifications);
-        ManualClassificationFeatureCollection manualCollection= new ManualClassificationFeatureCollection(manualClassification);
-        FieldFeatureDTO fieldFeatureDTO = new FieldFeatureDTO(properties, geometry, imageDTOs, AutomaticCollection, manualCollection);
-        FeatureCollectionDTO featureCollection = new FeatureCollectionDTO(fieldFeatureDTO);
-        
-        return featureCollection;
-    }
 }

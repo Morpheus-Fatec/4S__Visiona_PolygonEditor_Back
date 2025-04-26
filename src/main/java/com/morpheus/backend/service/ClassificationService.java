@@ -25,8 +25,12 @@ import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationFeature
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationProperties;
 import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationCollection;
 import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeature;
+import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
 import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollection;
+import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollectionDTO;
+import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollectionOut;
 import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionFeature;
+import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionProperties;
 import com.morpheus.backend.entity.ClassEntity;
 import com.morpheus.backend.entity.User;
 import com.morpheus.backend.repository.ClassEntityRepository;
@@ -124,25 +128,39 @@ public class ClassificationService {
         automaticClassificationRepository.saveAll(automaticClassifications);
     }
 
-    public List<ManualClassificationFeature> getManualClassificationByFieldId(Long fieldId) {
-        List<ClassificationDTO> manual = manualClassificationRepository.getManualClassificationByFieldId(fieldId);
-
-        List<ManualClassificationFeature> manualDTOs = manual.stream().map(manualClassification -> {
-            ManualClassificationFeature manualDTO = new ManualClassificationFeature();
-            ClassificationProperties classificationProperties = new ClassificationProperties(manualClassification.getId(), manualClassification.getArea(), manualClassification.getClassEntity());
+    public ManualClassificationFeatureCollection getManualClassificationByFieldId(Long fieldId) {
+        List<ClassificationDTO> manualClassifications = manualClassificationRepository.getManualClassificationByFieldId(fieldId);
+        if (manualClassifications == null || manualClassifications.isEmpty()) {
+            ManualClassificationFeatureCollection emptyCollection = new ManualClassificationFeatureCollection();
+            emptyCollection.setIdField(fieldId);
+            return emptyCollection;      
+        }
+        Long idUserResponsable = classificationControlRepository.getAnalystResponsableByFieldId(fieldId);
+        
+        ManualClassificationFeatureCollection manualClassificationCollection = new ManualClassificationFeatureCollection();
+        manualClassificationCollection.setIdField(fieldId);
+        manualClassificationCollection.setIdUserResponsable(idUserResponsable);
+        manualClassificationCollection.setFeatures(new ArrayList<>());
+    
+        for (ClassificationDTO manual : manualClassifications) {
+            ClassificationProperties classificationProperties = new ClassificationProperties(
+                manual.getId(), 
+                manual.getArea(), 
+                manual.getClassEntity()
+            );
+    
             GeometryDTO classificationGeometry = new GeometryDTO();
             try {
-                classificationGeometry.convertToGeoJson(manualClassification.getCoordinates());
+                classificationGeometry.convertToGeoJson(manual.getCoordinates());
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
-            }
-            manualDTO.setProperties(classificationProperties);
-            manualDTO.setGeometry(classificationGeometry);
-            return manualDTO;
-        }).collect(Collectors.toList());
-        return manualDTOs;
-        
-    }   
+            }    
+            ManualClassificationFeature feature = new ManualClassificationFeature(classificationProperties, classificationGeometry);
+            manualClassificationCollection.getFeatures().add(feature);
+        }
+    
+        return manualClassificationCollection;
+    }
 
     @Transactional
     public void saveManualClassification(ManualClassificationCollection manualDTO) throws Exception {
@@ -196,8 +214,40 @@ public class ClassificationService {
             }
         } catch (Exception e) {
             throw new RuntimeException("Erro ao salvar a classificação manual: " + e.getMessage());
+        }   
+    }
+
+    public RevisionClassificationCollectionOut getRevisionClassificationByFieldId(Long fieldId){
+        List<RevisionClassificationCollectionDTO> revisions= revisionManualClassificationRepository.findRevisionClassificationOutByFieldId(fieldId);
+
+        if (revisions == null || revisions.isEmpty()) {
+            RevisionClassificationCollectionOut revisionEmpyt = new RevisionClassificationCollectionOut();
+            revisionEmpyt.setIdField(fieldId);
+            return revisionEmpyt;
         }
-        
+
+        Long idUserResponsable = classificationControlRepository.getConsultationResponsableByFieldId(fieldId);
+        RevisionClassificationCollectionOut revisionClassificationCollectionOut = new RevisionClassificationCollectionOut();
+ 
+        for (RevisionClassificationCollectionDTO revision : revisions) {
+            RevisionFeature revisionFeature = new RevisionFeature();
+
+            RevisionProperties properties = new RevisionProperties(revision.getId(), revision.getComment());
+
+            GeometryDTO geometry = new GeometryDTO();
+            try {
+                geometry.convertToGeoJson(revision.getCoordinates());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
+            revisionFeature.setProperties(properties);
+            revisionFeature.setGeometry(geometry);
+            revisionClassificationCollectionOut.getFeatures().add(revisionFeature);
+        }
+        revisionClassificationCollectionOut.setIdField(fieldId);
+        revisionClassificationCollectionOut.setUserResponsable(idUserResponsable);
+        return revisionClassificationCollectionOut;
     }
 
     @Transactional
