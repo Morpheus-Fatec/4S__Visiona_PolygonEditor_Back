@@ -1,9 +1,10 @@
 package com.morpheus.backend.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.morpheus.backend.DTO.UserDto;
@@ -31,7 +32,7 @@ public class UserService {
                 throw new DefaultException("O nome é obrigatório.");
             }
 
-            if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+            if (userRepository.findByEmail(userDto.getEmail()) != null) {
                 throw new DefaultException("Já existe um usuário com esse e-mail cadastrado");
             }
 
@@ -43,14 +44,14 @@ public class UserService {
             if (rolesSelected != 1) {
                 throw new DefaultException("Você deve selecionar exatamente um tipo de usuário (Admin, Consultant ou Analyst).");
             }
-
             User user = new User();
             user.setName(userDto.getName());
             user.setEmail(userDto.getEmail());
             user.setIsAdmin(userDto.getIsAdmin());
             user.setIsAnalyst(userDto.getIsConsultant());
             user.setIsConsultant(userDto.getIsAnalyst());
-            user.setPassword(userDto.getPassword());
+            String encryptPassword = new BCryptPasswordEncoder().encode(userDto.getPassword());
+            user.setPassword(encryptPassword);
             userRepository.save(user);
 
             return "Usuário Criado Com Sucesso!";   
@@ -80,7 +81,7 @@ public class UserService {
     public String updateUser(Long userId, UserDto userDto) {
         try {
             User user = userRepository.getUserById(userId);
-            Optional<User> existingUserOptional = userRepository.findByEmail(userDto.getEmail());
+            UserDetails existingUserOptional = userRepository.findByEmail(userDto.getEmail());
     
             if (user == null) {
                 throw new DefaultException("Usuário não encontrado.");
@@ -98,8 +99,8 @@ public class UserService {
                 throw new DefaultException("O nome é obrigatório.");
             }
 
-            if (existingUserOptional.isPresent()) {
-                User existingUser = existingUserOptional.get();
+            if (existingUserOptional != null) {
+                User existingUser = (User) existingUserOptional;
             
                 if (!existingUser.getId().equals(userId)) {
                     throw new DefaultException("Já existe um usuário com esse e-mail cadastrado.");
