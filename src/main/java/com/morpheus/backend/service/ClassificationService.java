@@ -67,7 +67,7 @@ public class ClassificationService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired 
+    @Autowired
     private FieldRepository fieldRepository;
 
     public List<ClassificationFeature> getAutomaticClassificationsByFieldId(Long fieldId) {
@@ -134,7 +134,7 @@ public class ClassificationService {
         if (manualClassifications == null || manualClassifications.isEmpty()) {
             ManualClassificationFeatureCollection emptyCollection = new ManualClassificationFeatureCollection();
             emptyCollection.setIdField(fieldId);
-            return emptyCollection;      
+            return emptyCollection;
         }
         Long idUserResponsable = classificationControlRepository.getAnalystResponsableByFieldId(fieldId);
         
@@ -145,8 +145,8 @@ public class ClassificationService {
     
         for (ClassificationDTO manual : manualClassifications) {
             ClassificationProperties classificationProperties = new ClassificationProperties(
-                manual.getId(), 
-                manual.getArea(), 
+                manual.getId(),
+                manual.getArea(),
                 manual.getClassEntity()
             );
     
@@ -155,7 +155,7 @@ public class ClassificationService {
                 classificationGeometry.convertToGeoJson(manual.getCoordinates());
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
-            }    
+            }
             ManualClassificationFeature feature = new ManualClassificationFeature(classificationProperties, classificationGeometry);
             manualClassificationCollection.getFeatures().add(feature);
         }
@@ -207,7 +207,7 @@ public class ClassificationService {
 
                 Optional<ClassEntity> optionalClassEntity = classEntityRepository.findByName(feature.getProperties().getClassEntity());
 
-                ClassEntity classEntity = optionalClassEntity.orElseThrow(() -> 
+                ClassEntity classEntity = optionalClassEntity.orElseThrow(() ->
                     new RuntimeException("Classe não encontrada: " + feature.getProperties().getClassEntity())
                 );
 
@@ -218,7 +218,7 @@ public class ClassificationService {
             }
         } catch (Exception e) {
             throw new RuntimeException("Erro ao salvar a classificação manual: " + e.getMessage());
-        }   
+        }
     }
 
 
@@ -233,7 +233,7 @@ public class ClassificationService {
 
         Long idUserResponsable = classificationControlRepository.getConsultationResponsableByFieldId(fieldId);
         RevisionClassificationCollectionOut revisionClassificationCollectionOut = new RevisionClassificationCollectionOut();
- 
+        
         for (RevisionClassificationCollectionDTO revision : revisions) {
             RevisionFeature revisionFeature = new RevisionFeature();
 
@@ -291,8 +291,10 @@ public class ClassificationService {
 
         revisionManualClassificationRepository.deleteByClassificationControl(control);
 
+        Set<RevisionFeature> uniqueFeatures = new HashSet<>(revisionClassificationCollection.getFeatures());
+
         try {
-            for (RevisionFeature revision : revisionClassificationCollection.getFeatures()) {
+            for (RevisionFeature revision : uniqueFeatures) {
                 RevisionManualClassification revisionEntity = new RevisionManualClassification();
                 revisionEntity.setClassificationControl(control);
                 revisionEntity.setCoordenatiesHighLight(revision.getGeometry().convertStringToMultiPolygon());
