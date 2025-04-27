@@ -93,14 +93,15 @@ public class FieldService {
     private ClassificationControlRepository classificationControlRepo;
 
     public Field createField(CreateFieldDTO fieldDTO, Scan scan){
+        validateFieldDTO(fieldDTO);
         try {
-            if (fieldDTO.getNameFarm().isEmpty()){
-                throw new DefaultException("Farm não pode ser nulo.");
-            }
 
-            Farm farmField = new Farm();
-            farmField.setFarmName(fieldDTO.getNameFarm());
-            Farm farm = farmRepository.save(farmField);
+            Farm farm = farmRepository.findByFarmName(fieldDTO.getNameFarm())
+            .orElseGet(() -> {
+                Farm newFarm = new Farm();
+                newFarm.setFarmName(fieldDTO.getNameFarm());
+                return farmRepository.save(newFarm);
+            });
 
             Culture culture = cultureRepository.findByName(fieldDTO.getCulture())
             .orElseGet(() -> {
@@ -115,7 +116,7 @@ public class FieldService {
                 newSoil.setName(fieldDTO.getSoil());
                 return soilRepository.save(newSoil);
             });
-    
+
             Field field = new Field();
             field.setFarm(farm);
             field.setHarvest(fieldDTO.getHarvest());
@@ -128,12 +129,15 @@ public class FieldService {
             field.setCoordinates(fieldDTO.convertStringToMultiPolygon());
             field.setScanning(scan);
             fieldRepository.save(field);
-    
+
             return field;
 
-    
+        } catch (DefaultException e) {
+            throw e;
+        } catch (JsonProcessingException e) {
+            throw new DefaultException("Erro ao processar coordenadas GeoJSON: " + e.getMessage());
         } catch (Exception e) {
-            throw new DefaultException("Erro ao criar o talhão: " + e.getMessage());
+            throw new DefaultException("Erro inesperado ao criar o talhão: " + e.getMessage());
         }
     }
 
@@ -357,5 +361,19 @@ public class FieldService {
         return new ManualDTO(crs, features);
     }
 
+    private void validateFieldDTO(CreateFieldDTO fieldDTO) {
+        if (fieldDTO.getNameFarm() == null || fieldDTO.getNameFarm().isEmpty()) {
+            throw new DefaultException("O nome da fazenda não pode ser nulo ou vazio.");
+        }
+        if (fieldDTO.getNameField() == null || fieldDTO.getNameField().isEmpty()) {
+            throw new DefaultException("O nome do talhão não pode ser nulo ou vazio.");
+        }
+        if (fieldDTO.getCulture() == null || fieldDTO.getCulture().isEmpty()) {
+            throw new DefaultException("A cultura não pode ser nula ou vazia.");
+        }
+        if (fieldDTO.getArea() == null || fieldDTO.getArea().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new DefaultException("A área deve ser maior que zero.");
+        }
+    }
 
 }
