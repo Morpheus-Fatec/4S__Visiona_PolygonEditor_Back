@@ -244,17 +244,15 @@ public class FieldService {
         field.setProductivity(dto.getProductivity());
     
         if (dto.getFarm() != null) {
-            Farm farm = dto.getFarm();
-            FarmDTO farmDTO = new FarmDTO(farm.getFarmName(), farm.getFarmCity(), farm.getFarmState(), farm.getId());
-            farmService.updateFarm(farm.getId(), farmDTO);
+            field.setFarm(dto.getFarm());
         }
         
         if (dto.getSoil() != null) {
-            soilService.updateSoil(dto.getSoil().getId(), dto.getSoil().getName());
+            field.setSoil(dto.getSoil());
         }
         
         if (dto.getCulture() != null) {
-            cultureService.updateCulture(dto.getCulture().getId(), dto.getCulture().getName());
+            field.setCulture(dto.getCulture());
         }
     
         Field updatedField = fieldRepository.save(field);

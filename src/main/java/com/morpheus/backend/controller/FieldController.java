@@ -89,7 +89,7 @@ public class FieldController {
         return ResponseEntity.ok(revisionCollection);
     }
 
-    @PutMapping("/{id}/avaliar")
+    @PutMapping("/{id}/update")
     public ResponseEntity<Map<String, String>> updateField(
             @PathVariable Long id,
             @RequestBody FieldUpdatesDTO dto) {
