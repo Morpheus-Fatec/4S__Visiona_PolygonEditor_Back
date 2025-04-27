@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -168,12 +169,12 @@ public class ClassificationService {
         ClassificationControl control = classificationControlRepository.findByFieldId(manualDTO.getIdField());
         User userResponsable = userRepository.getUserById(manualDTO.getUserResponsable());
         Duration duration = null;
+
         try {
             duration = Duration.between(manualDTO.getBegin(), manualDTO.getEnd());
         } catch (Exception e) {
             throw new RuntimeException("Erro ao calcular a duração: " + e.getMessage());
         }
-        
 
         if (control.getAnalystResponsable() == null) {
             control.setAnalystResponsable(userResponsable);
@@ -194,28 +195,32 @@ public class ClassificationService {
         fieldRepository.save(field);
 
         manualClassificationRepository.deleteByClassificationControl(control);
+
+        Set<ClassificationFeature> uniqueFeatures = new HashSet<>(manualDTO.getFeatures());
+
         try {
-            for (ClassificationFeature feature : manualDTO.getFeatures()) {
+            for (ClassificationFeature feature : uniqueFeatures) {
                 ManualClassification manual = new ManualClassification();
-    
+
                 manual.setClassificationControl(control);
                 manual.setArea(feature.getProperties().getArea());
-    
+
                 Optional<ClassEntity> optionalClassEntity = classEntityRepository.findByName(feature.getProperties().getClassEntity());
-    
+
                 ClassEntity classEntity = optionalClassEntity.orElseThrow(() -> 
                     new RuntimeException("Classe não encontrada: " + feature.getProperties().getClassEntity())
                 );
-    
+
                 manual.setClassEntity(classEntity);
                 manual.setCoordenadas(feature.getGeometry().convertStringToMultiPolygon());
-    
+
                 manualClassificationRepository.save(manual);
             }
         } catch (Exception e) {
             throw new RuntimeException("Erro ao salvar a classificação manual: " + e.getMessage());
         }   
     }
+
 
     public RevisionClassificationCollectionOut getRevisionClassificationByFieldId(Long fieldId){
         List<RevisionClassificationCollectionDTO> revisions= revisionManualClassificationRepository.findRevisionClassificationOutByFieldId(fieldId);
