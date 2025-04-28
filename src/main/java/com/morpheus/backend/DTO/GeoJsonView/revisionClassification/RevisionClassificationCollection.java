@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RevisionClassificationCollection {
-    private final String type = "FeatureCollection";
     private Long idField;
     private Long userResponsable;
     private Status status;
