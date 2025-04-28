@@ -30,7 +30,7 @@ public class ClassificationController {
         }
     }
 
-    @PostMapping("/RevisonClassification")
+    @PostMapping("/revisonClassification")
     public ResponseEntity<String> createRevisionClassification(@RequestBody RevisionClassificationCollection revisionClassificationCollection) {
         try {
             classificationService.saveRevisionClassification(revisionClassificationCollection);
