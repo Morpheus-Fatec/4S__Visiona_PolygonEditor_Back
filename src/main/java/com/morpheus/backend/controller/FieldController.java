@@ -10,6 +10,9 @@ import com.morpheus.backend.DTO.Download.DownloadManual.ManualDTO;
 import com.morpheus.backend.DTO.Download.DownloadSaida.SaidaDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureCollectionDTO;
 import com.morpheus.backend.DTO.GeoJsonView.FeatureSimpleDTO;
+import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
+import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollectionOut;
+import com.morpheus.backend.service.ClassificationService;
 import com.morpheus.backend.entity.classifications.ClassificationControl;
 import com.morpheus.backend.repository.classification.ClassificationControlRepository;
 import com.morpheus.backend.service.FieldService;
@@ -43,6 +46,9 @@ public class FieldController {
     private FieldService fieldService;
 
     @Autowired
+    private ClassificationService classificationService;
+
+    @Autowired
     private ClassificationControlRepository classificationControlRepository;
 
     @GetMapping("/featureCollectionSimple")
@@ -69,7 +75,21 @@ public class FieldController {
         return ResponseEntity.ok(featureCollectionDTO);
     }
 
-    @PutMapping("/{id}/avaliar")
+    @GetMapping("/manualCollection/{id}")
+    public ResponseEntity<ManualClassificationFeatureCollection> getManualClassificationByFieldId(@PathVariable Long id) throws IllegalAccessError {
+        ManualClassificationFeatureCollection manualCollection = classificationService.getManualClassificationByFieldId(id);
+
+        return ResponseEntity.ok(manualCollection);
+    }
+
+    @GetMapping("/revisionCollection/{id}")
+    public ResponseEntity<RevisionClassificationCollectionOut> getRevisionClassificationByFieldId(@PathVariable Long id) throws IllegalAccessError {
+        RevisionClassificationCollectionOut revisionCollection = classificationService.getRevisionClassificationByFieldId(id);
+
+        return ResponseEntity.ok(revisionCollection);
+    }
+
+    @PutMapping("/{id}/update")
     public ResponseEntity<Map<String, String>> updateField(
             @PathVariable Long id,
             @RequestBody FieldUpdatesDTO dto) {

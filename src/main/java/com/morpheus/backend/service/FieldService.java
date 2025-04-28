@@ -12,7 +12,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.CultureDTO;
 import com.morpheus.backend.DTO.FarmDTO;
@@ -37,7 +36,6 @@ import com.morpheus.backend.DTO.GeoJsonView.ImageViewDTO;
 import com.morpheus.backend.DTO.GeoJsonView.PropertiesDTO;
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationColletion;
 import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationFeature;
-import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationProperties;
 import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.entity.Farm;
 import com.morpheus.backend.entity.Field;
@@ -46,14 +44,13 @@ import com.morpheus.backend.entity.Scan;
 import com.morpheus.backend.entity.Soil;
 import com.morpheus.backend.entity.Status;
 import com.morpheus.backend.entity.classifications.ClassificationControl;
-import com.morpheus.backend.entity.classifications.ClassificationManual;
+import com.morpheus.backend.entity.classifications.ManualClassification;
 import com.morpheus.backend.repository.CultureRepository;
 import com.morpheus.backend.repository.FarmRepository;
 import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.backend.repository.ImageRepository;
 import com.morpheus.backend.repository.SoilRepository;
 import com.morpheus.backend.utilities.ConverterToMultipolygon;
-import com.morpheus.backend.repository.classification.ClassificationAutomaticRepository;
 import com.morpheus.backend.repository.classification.ClassificationControlRepository;
 import com.morpheus.exceptions.DefaultException;
 
@@ -94,9 +91,6 @@ public class FieldService {
 
     @Autowired
     private ClassificationControlRepository classificationControlRepo;
-
-    @Autowired
-    private ClassificationAutomaticRepository classificationAutomaticRepository;
 
     public Field createField(CreateFieldDTO fieldDTO, Scan scan){
         validateFieldDTO(fieldDTO);
@@ -201,7 +195,7 @@ public class FieldService {
     public FeatureCollectionDTO getCompleteFieldById(Long idField) {
         FieldDTO field = fieldRepository.getFieldById(idField).orElseThrow(() -> new DefaultException("Talhão não encontrado."));
         Long scanID = field.getScanningId();
-        List<ClassificationDTO> classifications = classificationAutomaticRepository.getClassificationAutomaticByFieldId(field.getId());
+        List<ClassificationFeature> Automaticclassifications = classificationService.getAutomaticClassificationsByFieldId(field.getId());
         List<Image> images = imageRepository.getImagesByScanId(scanID);
 
         FarmDTO farmDTO = field.getFarm();
@@ -218,27 +212,11 @@ public class FieldService {
         properties.setFarm(farmDTO);
 
         GeometryDTO geometry = new GeometryDTO();
-        try{
-            geometry.convertToGeoJson(field.getCoordinates());
+        try {
+            geometry.convertToGeoJson(field.getCoordinates().toString());
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        
-        List<ClassificationFeature> classificationDTOs = classifications.stream().map(classification -> {
-            ClassificationFeature classificationDTO = new ClassificationFeature();
-            ClassificationProperties classificationProperties = new ClassificationProperties(classification.getId(), classification.getArea(), classification.getClassEntity());
-            GeometryDTO classificationGeometry = new GeometryDTO();
-            try {
-                classificationGeometry.convertToGeoJson(classification.getCoordinates());
-            } catch (JsonProcessingException e) {
-
-                e.printStackTrace();
-            }
-            classificationDTO.setProperties(classificationProperties);
-            classificationDTO.setGeometry(classificationGeometry);
-            return classificationDTO;
-        }).collect(Collectors.toList());
-
 
         List<ImageViewDTO> imageDTOs = images.stream().map(image -> {
             ImageViewDTO imageDTO = new ImageViewDTO();
@@ -247,17 +225,10 @@ public class FieldService {
             return imageDTO;
         }).collect(Collectors.toList());
 
-        FieldFeatureDTO fieldFeatureDTO = new FieldFeatureDTO();
-        fieldFeatureDTO.setProperties(properties);
-        fieldFeatureDTO.setGeometry(geometry);
-        fieldFeatureDTO.setImages(imageDTOs);
-        
-        ClassificationColletion classificationCollection = new ClassificationColletion();
-        classificationCollection.setFeatures(classificationDTOs);
-        fieldFeatureDTO.setClassification(classificationCollection);
-        
-        FeatureCollectionDTO featureCollection = new FeatureCollectionDTO();
-        featureCollection.setFeatures(fieldFeatureDTO);
+
+        ClassificationColletion AutomaticCollection = new ClassificationColletion(Automaticclassifications);
+        FieldFeatureDTO fieldFeatureDTO = new FieldFeatureDTO(properties, geometry, imageDTOs, AutomaticCollection);
+        FeatureCollectionDTO featureCollection = new FeatureCollectionDTO(fieldFeatureDTO);
         
         return featureCollection;
     }
@@ -273,17 +244,15 @@ public class FieldService {
         field.setProductivity(dto.getProductivity());
     
         if (dto.getFarm() != null) {
-            Farm farm = dto.getFarm();
-            FarmDTO farmDTO = new FarmDTO(farm.getFarmName(), farm.getFarmCity(), farm.getFarmState(), farm.getId());
-            farmService.updateFarm(farm.getId(), farmDTO);
+            field.setFarm(dto.getFarm());
         }
         
         if (dto.getSoil() != null) {
-            soilService.updateSoil(dto.getSoil().getId(), dto.getSoil().getName());
+            field.setSoil(dto.getSoil());
         }
         
         if (dto.getCulture() != null) {
-            cultureService.updateCulture(dto.getCulture().getId(), dto.getCulture().getName());
+            field.setCulture(dto.getCulture());
         }
     
         Field updatedField = fieldRepository.save(field);
@@ -361,17 +330,17 @@ public class FieldService {
     public ManualDTO gerarGeoJsonPorIdManual(Long fielId) {
         ClassificationControl control = classificationControlRepo.findByFieldId(fielId);
         
-        List<ClassificationManual> manualClassificationList = classificationService.findByClassificationControl(control);
+        List<ManualClassification> manualClassificationList = classificationService.findByClassificationControl(control);
         
         if (manualClassificationList.isEmpty()) {
-            throw new EntityNotFoundException("Classificação automatica não encontrada");
+            throw new EntityNotFoundException("Classificação manual não encontrada");
         }
 
         CrsDto crs = new CrsDto();
 
         List<FeatureManualDto> features = new ArrayList<>();
 
-        for (ClassificationManual manual : manualClassificationList) {
+        for (ManualClassification manual : manualClassificationList) {
             FieldPropertiesManualDto propertiesManualDto = new FieldPropertiesManualDto(
                 manual.getClassificationControl().getField().getName(),
                 manual.getArea(),

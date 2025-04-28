@@ -48,8 +48,8 @@ public class UserService {
             user.setName(userDto.getName());
             user.setEmail(userDto.getEmail());
             user.setIsAdmin(userDto.getIsAdmin());
-            user.setIsAnalyst(userDto.getIsConsultant());
-            user.setIsConsultant(userDto.getIsAnalyst());
+            user.setIsAnalyst(userDto.getIsAnalyst());
+            user.setIsConsultant(userDto.getIsConsultant());
             user.setPassword(userDto.getPassword());
             userRepository.save(user);
 
