@@ -267,7 +267,7 @@ public class ClassificationService {
             throw new RuntimeException("Erro ao calcular a duração: " + e.getMessage());
         }
 
-        if (userResponsable =! null) {
+        if (userResponsable != null) {
             control.setAnalystResponsable(userResponsable);
         } else {
             throw new RuntimeException("é necessário um consultor vinculado.");
