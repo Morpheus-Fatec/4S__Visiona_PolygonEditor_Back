@@ -6,8 +6,11 @@ import lombok.Data;
 
 @Data
 public class ClassificationColletion {
-    private String type = "FeatureCollection";
     private List<ClassificationFeature> features;
+
+    public ClassificationColletion(List<ClassificationFeature> features) {
+        this.features = features;
+    }
    
 
 }
