@@ -1,5 +1,6 @@
 package com.morpheus.backend.DTO.GeoJsonView.revisionClassification;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.morpheus.backend.entity.Status;
@@ -16,6 +17,6 @@ public class RevisionClassificationCollectionOut {
     private Long idField;
     private Long userResponsable;
     private Status status;
-    private List<RevisionFeature> features;
+    private List<RevisionFeature> features = new ArrayList<RevisionFeature>();
 
 }
