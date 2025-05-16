@@ -1,5 +1,6 @@
 package com.morpheus.backend.DTO.GeoJsonView.manualClassification;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -12,9 +13,6 @@ import lombok.NoArgsConstructor;
 public class ManualClassificationFeatureCollection {
     private Long idUserResponsable;
     private Long idField;
-    private List<ManualClassificationFeature> features;
+    private List<ManualClassificationFeature> features = new ArrayList<ManualClassificationFeature>();
 
-    public ManualClassificationFeatureCollection(List<ManualClassificationFeature> features) {
-        this.features = features;
-    }
 }

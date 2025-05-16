@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -141,7 +140,6 @@ public class ClassificationService {
         ManualClassificationFeatureCollection manualClassificationCollection = new ManualClassificationFeatureCollection();
         manualClassificationCollection.setIdField(fieldId);
         manualClassificationCollection.setIdUserResponsable(idUserResponsable);
-        manualClassificationCollection.setFeatures(new ArrayList<>());
     
         for (ClassificationDTO manual : manualClassifications) {
             ClassificationProperties classificationProperties = new ClassificationProperties(
@@ -178,9 +176,12 @@ public class ClassificationService {
 
         if (control.getAnalystResponsable() == null) {
             control.setAnalystResponsable(userResponsable);
-        } else if (!Objects.equals(control.getAnalystResponsable().getId(), userResponsable.getId())) {
+        } 
+        
+        if (control.getAnalystResponsable().getId() != manualDTO.getUserResponsable()){
             throw new RuntimeException("Este controle de classificação já está sendo editado por outro usuário.");
         }
+       
 
         if (control.getTimeSpentManual() == null) {
             control.setTimeSpentManual(duration);
@@ -223,7 +224,9 @@ public class ClassificationService {
 
 
     public RevisionClassificationCollectionOut getRevisionClassificationByFieldId(Long fieldId){
-        List<RevisionClassificationCollectionDTO> revisions= revisionManualClassificationRepository.findRevisionClassificationOutByFieldId(fieldId);
+        List<RevisionClassificationCollectionDTO> revisions = revisionManualClassificationRepository.findRevisionClassificationOutByFieldId(fieldId);
+
+        System.out.println(revisions);
 
         if (revisions == null || revisions.isEmpty()) {
             RevisionClassificationCollectionOut revisionEmpyt = new RevisionClassificationCollectionOut();
@@ -267,10 +270,12 @@ public class ClassificationService {
             throw new RuntimeException("Erro ao calcular a duração: " + e.getMessage());
         }
 
-        if (userResponsable != null) {
-            control.setAnalystResponsable(userResponsable);
-        } else {
-            throw new RuntimeException("é necessário um consultor vinculado.");
+        if (control.getConsultantResponsable() == null) {
+            control.setConsultantResponsable(userResponsable);
+        }
+        
+        if (control.getConsultantResponsable() != null && !control.getConsultantResponsable().getId().equals(userResponsable.getId())) {
+            throw new RuntimeException("Este controle de classificação já está sendo editado por outro usuário.");
         }
 
         if (control.getTimeSpentRevision() == null) {
