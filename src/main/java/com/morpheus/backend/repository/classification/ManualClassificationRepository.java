@@ -3,10 +3,11 @@ package com.morpheus.backend.repository.classification;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
-
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.morpheus.backend.DTO.ClassificationDTO;
+import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
 import com.morpheus.backend.entity.classifications.ClassificationControl;
 import com.morpheus.backend.entity.classifications.ManualClassification;
 
@@ -32,4 +33,25 @@ public interface ManualClassificationRepository extends JpaRepository<ManualClas
 
     void deleteByClassificationControl(ClassificationControl control);
 
+        @Query(value = """
+            SELECT m.*
+            FROM classificacao_manual m
+            LEFT JOIN classificacao_automatica a
+            ON ST_Intersects(m.coordenadas_manual, a.coordenadas_automatica)
+            AND m.id_controle_classificacao = a.id_controle_classificacao
+            WHERE a.id_classificacao_automatica IS NULL
+            AND m.id_controle_classificacao = :controlId
+            """, nativeQuery = true)
+        ManualClassificationFeatureCollection findFalseNegatives(@Param("controlId") Long controlId);
+
+    @Query(value = """
+        SELECT m.*
+        FROM classificacao_manual m
+        RIGHT JOIN classificacao_automatica a
+        ON ST_Intersects(a.coordenadas_automatica, m.coordenadas_manual)
+        AND a.id_controle_classificacao = m.id_controle_classificacao
+        WHERE m.id_classificacao_manual IS NULL
+        AND a.id_controle_classificacao = :controlId
+        """, nativeQuery = true)
+    ManualClassificationFeatureCollection findFalsePositives(@Param("controlId") Long controlId);
 }
