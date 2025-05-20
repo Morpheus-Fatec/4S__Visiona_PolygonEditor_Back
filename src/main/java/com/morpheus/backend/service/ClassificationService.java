@@ -310,4 +310,26 @@ public class ClassificationService {
         List<ManualClassification> manual = manualClassificationRepository.findByClassificationControl(control);
         return manual;
     }
+
+    public ManualClassificationFeatureCollection getFalsePositiveByFieldId(Long id){
+        if (id == null) {
+            throw new IllegalArgumentException("O ID do campo não pode ser nulo.");
+        }
+        if (!fieldRepository.existsById(id)) {
+            throw new IllegalArgumentException("Campo não encontrado com o ID fornecido: " + id);
+        }
+        
+        return manualClassificationRepository.findFalsePositives(id);
+    }
+
+    public ManualClassificationFeatureCollection getFalseNegativeByFieldId(Long id){
+        if (id == null) {
+            throw new IllegalArgumentException("O ID do campo não pode ser nulo.");
+        }
+        if (!fieldRepository.existsById(id)) {
+            throw new IllegalArgumentException("Campo não encontrado com o ID fornecido: " + id);
+        }
+
+        return manualClassificationRepository.findFalseNegatives(id);
+    }
 }
