@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.CreateFieldDTO;
 import com.morpheus.backend.DTO.CultureDTO;
 import com.morpheus.backend.DTO.FarmDTO;
@@ -260,7 +261,6 @@ public class FieldService {
         return mapToDto(updatedField);
     }
     
-
     private void validate(FieldUpdatesDTO dto) {
         if (dto.getName() == null || dto.getName().trim().isEmpty()) {
             throw new DefaultException("O nome do Talhão é obrigatório.");
