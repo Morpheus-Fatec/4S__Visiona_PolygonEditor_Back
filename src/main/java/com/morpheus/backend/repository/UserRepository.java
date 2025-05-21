@@ -10,6 +10,5 @@ import com.morpheus.backend.entity.User;
 public interface UserRepository extends JpaRepository<User, Long>{
     User getUserById(Long id);
     UserDetails findByEmail(String email);
-
-    
+    User getUserByEmail(String email);    
 }
