@@ -311,25 +311,69 @@ public class ClassificationService {
         return manual;
     }
 
-    public ManualClassificationFeatureCollection getFalsePositiveByFieldId(Long id){
-        if (id == null) {
-            throw new IllegalArgumentException("O ID do campo não pode ser nulo.");
+    public ManualClassificationFeatureCollection getFalsePositiveByFieldId(Long fieldId){
+        List<ClassificationDTO> falsePositiveClassification = manualClassificationRepository.getManualClassificationByFieldId(fieldId);
+        if (falsePositiveClassification == null || falsePositiveClassification.isEmpty()) {
+            ManualClassificationFeatureCollection emptyCollection = new ManualClassificationFeatureCollection();
+            emptyCollection.setIdField(fieldId);
+            return emptyCollection;
         }
-        if (!fieldRepository.existsById(id)) {
-            throw new IllegalArgumentException("Campo não encontrado com o ID fornecido: " + id);
+        Long idUserResponsable = classificationControlRepository.getAnalystResponsableByFieldId(fieldId);
+
+        ManualClassificationFeatureCollection falsePositiveClassificationCollection = new ManualClassificationFeatureCollection();
+        falsePositiveClassificationCollection.setIdField(fieldId);
+        falsePositiveClassificationCollection.setIdUserResponsable(idUserResponsable);
+        falsePositiveClassificationCollection.setFeatures(new ArrayList<>());
+
+        for (ClassificationDTO falsePositive : falsePositiveClassification) {
+            ClassificationProperties classificationProperties = new ClassificationProperties(
+                falsePositive.getId(),
+                falsePositive.getArea(),
+                falsePositive.getClassEntity()
+            );
+
+            GeometryDTO classificationGeometry = new GeometryDTO();
+            try {
+                classificationGeometry.convertToGeoJson(falsePositive.getCoordinates());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            ManualClassificationFeature feature = new ManualClassificationFeature(classificationProperties, classificationGeometry);
+            falsePositiveClassificationCollection.getFeatures().add(feature);
         }
-        
-        return manualClassificationRepository.findFalsePositives(id);
+        return falsePositiveClassificationCollection;
     }
 
     public ManualClassificationFeatureCollection getFalseNegativeByFieldId(Long id){
-        if (id == null) {
-            throw new IllegalArgumentException("O ID do campo não pode ser nulo.");
+        List<ClassificationDTO> falseNegativeClassification = manualClassificationRepository.getManualClassificationByFieldId(id);
+        if (falseNegativeClassification == null || falseNegativeClassification.isEmpty()) {
+            ManualClassificationFeatureCollection emptyCollection = new ManualClassificationFeatureCollection();
+            emptyCollection.setIdField(id);
+            return emptyCollection;
         }
-        if (!fieldRepository.existsById(id)) {
-            throw new IllegalArgumentException("Campo não encontrado com o ID fornecido: " + id);
+        Long idUserResponsable = classificationControlRepository.getAnalystResponsableByFieldId(id);
+        ManualClassificationFeatureCollection falseNegativeClassificationCollection = new ManualClassificationFeatureCollection();
+        falseNegativeClassificationCollection.setIdField(id);
+        falseNegativeClassificationCollection.setIdUserResponsable(idUserResponsable);
+        falseNegativeClassificationCollection.setFeatures(new ArrayList<>());
+
+        for (ClassificationDTO falseNegative : falseNegativeClassification) {
+            ClassificationProperties classificationProperties = new ClassificationProperties(
+                falseNegative.getId(),
+                falseNegative.getArea(),
+                falseNegative.getClassEntity()
+            );
+
+            GeometryDTO classificationGeometry = new GeometryDTO();
+            try {
+                classificationGeometry.convertToGeoJson(falseNegative.getCoordinates());
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            ManualClassificationFeature feature = new ManualClassificationFeature(classificationProperties, classificationGeometry);
+            falseNegativeClassificationCollection.getFeatures().add(feature);
         }
 
-        return manualClassificationRepository.findFalseNegatives(id);
+        return falseNegativeClassificationCollection;
     }
 }
