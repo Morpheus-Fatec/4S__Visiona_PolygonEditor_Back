@@ -319,11 +319,6 @@ public class ClassificationService {
 
     public ManualClassificationFeatureCollection getFalsePositiveByFieldId(Long fieldId) {
         ClassificationControl control = classificationControlRepository.findByFieldId(fieldId);
-        System.out.println("---------------------");
-        System.out.println("---------------------");
-        System.out.println("control.getIdControle(): " + control.getIdControle());
-        System.out.println("---------------------");
-        System.out.println("---------------------");
         List<Object[]> results = classificationControlRepository.getFalsePositivesByControlId(control.getIdControle());
 
         List<ManualClassificationFeature> features = new ArrayList<>();
@@ -334,77 +329,62 @@ public class ClassificationService {
             String className = (String) row[2];
             String geoJson = (String) row[3];
 
-            System.out.println("---------------------");
-            System.out.println("id: " + id);
-            System.out.println("Área: " + area);
-            System.out.println("Classe: " + className);
-
-            System.out.println("---------------------");
-
-            // Criar GeometryDTO a partir do geoJson
             GeometryDTO geometry = new GeometryDTO();
             try {
                 geometry.convertToGeoJson(geoJson);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
-                continue; // pula este item com erro
+                continue;
             }
 
-            // Criar ClassificationProperties
             ClassificationProperties properties = new ClassificationProperties(id, area, className);
 
-            // Criar ManualClassificationFeature
             ManualClassificationFeature feature = new ManualClassificationFeature(properties, geometry);
 
             features.add(feature);
-        
+    
         }
-        // Criar a FeatureCollection final
+
         ManualClassificationFeatureCollection falsePositiveCollection = new ManualClassificationFeatureCollection();
         falsePositiveCollection.setFeatures(features);
         falsePositiveCollection.setIdField(fieldId);
 
-
-        System.out.println("=== False Positives ===");
-        for (ManualClassificationFeature f : features) {
-            ClassificationProperties p = f.getProperties();
-            System.out.println("ID: " + p.getId() + ", Área: " + p.getArea() + ", Classe: " + p.getClassEntity());
-        }
-        System.out.println("=======================");
         return falsePositiveCollection;
     }
 
 
-    public ManualClassificationFeatureCollection getFalseNegativeByFieldId(Long id){
-        List<ClassificationDTO> falseNegativeClassification = manualClassificationRepository.getManualClassificationByFieldId(id);
-        if (falseNegativeClassification == null || falseNegativeClassification.isEmpty()) {
-            ManualClassificationFeatureCollection emptyCollection = new ManualClassificationFeatureCollection();
-            emptyCollection.setIdField(id);
-            return emptyCollection;
-        }
-        Long idUserResponsable = classificationControlRepository.getAnalystResponsableByFieldId(id);
-        ManualClassificationFeatureCollection falseNegativeClassificationCollection = new ManualClassificationFeatureCollection();
-        falseNegativeClassificationCollection.setIdField(id);
-        falseNegativeClassificationCollection.setIdUserResponsable(idUserResponsable);
-        falseNegativeClassificationCollection.setFeatures(new ArrayList<>());
+    public ManualClassificationFeatureCollection getFalseNegativeByFieldId(Long fieldId){
+         ClassificationControl control = classificationControlRepository.findByFieldId(fieldId);
+         List<Object[]> results = classificationControlRepository.getFalseNegativesByControlId(control.getIdControle());
 
-        for (ClassificationDTO falseNegative : falseNegativeClassification) {
-            ClassificationProperties classificationProperties = new ClassificationProperties(
-                falseNegative.getId(),
-                falseNegative.getArea(),
-                falseNegative.getClassEntity()
-            );
+        List<ManualClassificationFeature> features = new ArrayList<>();
 
-            GeometryDTO classificationGeometry = new GeometryDTO();
+         for (Object[] row : results) {
+            Long id = (Long) row[0];
+            BigDecimal area = (BigDecimal) row[1];
+            String className = (String) row[2];
+            String geoJson = (String) row[3];
+
+            GeometryDTO geometry = new GeometryDTO();
             try {
-                classificationGeometry.convertToGeoJson(falseNegative.getCoordinates());
+                geometry.convertToGeoJson(geoJson);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
+                continue;
             }
-            ManualClassificationFeature feature = new ManualClassificationFeature(classificationProperties, classificationGeometry);
-            falseNegativeClassificationCollection.getFeatures().add(feature);
+
+            ClassificationProperties properties = new ClassificationProperties(id, area, className);
+
+            ManualClassificationFeature feature = new ManualClassificationFeature(properties, geometry);
+
+            features.add(feature);
+    
         }
 
-        return new ManualClassificationFeatureCollection();
+        ManualClassificationFeatureCollection falseNegativeCollection = new ManualClassificationFeatureCollection();
+        falseNegativeCollection.setFeatures(features);
+        falseNegativeCollection.setIdField(fieldId);
+
+        return falseNegativeCollection;
     }
 }
