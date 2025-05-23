@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -167,8 +166,8 @@ public class ClassificationService {
         Field field = fieldRepository.getFieldEntityById(manualDTO.getIdField());
         ClassificationControl control = classificationControlRepository.findByFieldId(manualDTO.getIdField());
         User userResponsable = userRepository.getUserById(manualDTO.getUserResponsable());
-        Duration duration = null;
 
+        Duration duration;
         try {
             duration = Duration.between(manualDTO.getBegin(), manualDTO.getEnd());
         } catch (Exception e) {
@@ -178,11 +177,10 @@ public class ClassificationService {
         if (control.getAnalystResponsable() == null) {
             control.setAnalystResponsable(userResponsable);
         } 
-        
-        if (control.getAnalystResponsable().getId() != manualDTO.getUserResponsable()){
+
+        if (!control.getAnalystResponsable().getId().equals(manualDTO.getUserResponsable())) {
             throw new RuntimeException("Este controle de classificação já está sendo editado por outro usuário.");
         }
-       
 
         if (control.getTimeSpentManual() == null) {
             control.setTimeSpentManual(duration);
@@ -196,33 +194,27 @@ public class ClassificationService {
         field.setStatus(Status.UNDER_ANALYSIS);
         fieldRepository.save(field);
 
-        manualClassificationRepository.deleteByClassificationControl(control);
+        manualClassificationRepository.deleteAllByControlId(control.getIdControle());
 
         Set<ClassificationFeature> uniqueFeatures = new HashSet<>(manualDTO.getFeatures());
+        String classEntityName = uniqueFeatures.iterator().next().getProperties().getClassEntity();
+        ClassEntity classEntity = classEntityRepository.findByName(classEntityName)
+            .orElseThrow(() -> new RuntimeException("Classe não encontrada: " + classEntityName));
 
-        try {
-            for (ClassificationFeature feature : uniqueFeatures) {
-                ManualClassification manual = new ManualClassification();
+        List<ManualClassification> manualClassifications = new ArrayList<>();
 
-                manual.setClassificationControl(control);
-                manual.setArea(feature.getProperties().getArea());
+        for (ClassificationFeature feature : uniqueFeatures) {
+            ManualClassification manual = new ManualClassification();
+            manual.setClassificationControl(control);
+            manual.setArea(feature.getProperties().getArea());
+            manual.setClassEntity(classEntity);
+            manual.setCoordenadas(feature.getGeometry().convertStringToMultiPolygon());
 
-                Optional<ClassEntity> optionalClassEntity = classEntityRepository.findByName(feature.getProperties().getClassEntity());
-
-                ClassEntity classEntity = optionalClassEntity.orElseThrow(() ->
-                    new RuntimeException("Classe não encontrada: " + feature.getProperties().getClassEntity())
-                );
-
-                manual.setClassEntity(classEntity);
-                manual.setCoordenadas(feature.getGeometry().convertStringToMultiPolygon());
-
-                manualClassificationRepository.save(manual);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao salvar a classificação manual: " + e.getMessage());
+            manualClassifications.add(manual);
         }
-    }
 
+        manualClassificationRepository.saveAll(manualClassifications);
+    }
 
     public RevisionClassificationCollectionOut getRevisionClassificationByFieldId(Long fieldId){
         List<RevisionClassificationCollectionDTO> revisions = revisionManualClassificationRepository.findRevisionClassificationOutByFieldId(fieldId);

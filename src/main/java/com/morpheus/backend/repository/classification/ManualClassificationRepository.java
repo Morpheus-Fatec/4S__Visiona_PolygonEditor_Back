@@ -5,11 +5,14 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 
 import com.morpheus.backend.DTO.ClassificationDTO;
 import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
 import com.morpheus.backend.entity.classifications.ClassificationControl;
 import com.morpheus.backend.entity.classifications.ManualClassification;
+
+import jakarta.transaction.Transactional;
 
 public interface ManualClassificationRepository extends JpaRepository<ManualClassification, Long>{
 
@@ -54,4 +57,10 @@ public interface ManualClassificationRepository extends JpaRepository<ManualClas
         AND a.id_controle_classificacao = :controlId
         """, nativeQuery = true)
     ManualClassificationFeatureCollection findFalsePositives(@Param("controlId") Long controlId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM classificacao_manual WHERE id_controle_classificacao = :controlId", nativeQuery = true)
+    void deleteAllByControlId(@Param("controlId") Long controlId);
+
 }
