@@ -1,5 +1,7 @@
 package com.morpheus.backend.repository.classification;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +22,27 @@ public interface ClassificationControlRepository extends JpaRepository<Classific
 
     @Query("SELECT c.consultantResponsable.id FROM ClassificationControl c WHERE c.field.id = :fieldId")
     Long getConsultationResponsableByFieldId(@Param("fieldId") Long fieldId);
+
+    @Query(value = """
+    SELECT 
+        a.id_classificacao_automatica AS id,
+        a.area AS area,
+	    c.nome AS nome,
+        ST_AsGeoJSON(a.coordenadas_automatica) AS geojson
+    FROM classificacao_automatica a
+    JOIN classes c ON a.id_classe = c.id_classe
+    WHERE a.id_controle_classificacao = :idControle
+    AND NOT EXISTS (
+        SELECT 1
+        FROM classificacao_manual m
+        WHERE m.id_classe = a.id_classe
+        AND m.id_controle_classificacao = :idControle
+        AND ST_Intersects(a.coordenadas_automatica, m.coordenadas_manual)
+    );
+    """, nativeQuery = true)
+    List<Object[]> getFalsePositivesByControlId(@Param("idControle") Long idControle);
+
+
 
 
 }

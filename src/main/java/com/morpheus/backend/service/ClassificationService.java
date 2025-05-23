@@ -1,5 +1,6 @@
 package com.morpheus.backend.service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -311,38 +312,63 @@ public class ClassificationService {
         return manual;
     }
 
-    public ManualClassificationFeatureCollection getFalsePositiveByFieldId(Long fieldId){
-        List<ClassificationDTO> falsePositiveClassification = manualClassificationRepository.getManualClassificationByFieldId(fieldId);
-        if (falsePositiveClassification == null || falsePositiveClassification.isEmpty()) {
-            ManualClassificationFeatureCollection emptyCollection = new ManualClassificationFeatureCollection();
-            emptyCollection.setIdField(fieldId);
-            return emptyCollection;
-        }
-        Long idUserResponsable = classificationControlRepository.getAnalystResponsableByFieldId(fieldId);
+    public ManualClassificationFeatureCollection getFalsePositiveByFieldId(Long fieldId) {
+        ClassificationControl control = classificationControlRepository.findByFieldId(fieldId);
+        System.out.println("---------------------");
+        System.out.println("---------------------");
+        System.out.println("control.getIdControle(): " + control.getIdControle());
+        System.out.println("---------------------");
+        System.out.println("---------------------");
+        List<Object[]> results = classificationControlRepository.getFalsePositivesByControlId(control.getIdControle());
 
-        ManualClassificationFeatureCollection falsePositiveClassificationCollection = new ManualClassificationFeatureCollection();
-        falsePositiveClassificationCollection.setIdField(fieldId);
-        falsePositiveClassificationCollection.setIdUserResponsable(idUserResponsable);
-        falsePositiveClassificationCollection.setFeatures(new ArrayList<>());
+        List<ManualClassificationFeature> features = new ArrayList<>();
 
-        for (ClassificationDTO falsePositive : falsePositiveClassification) {
-            ClassificationProperties classificationProperties = new ClassificationProperties(
-                falsePositive.getId(),
-                falsePositive.getArea(),
-                falsePositive.getClassEntity()
-            );
+        for (Object[] row : results) {
+            Long id = (Long) row[0];
+            BigDecimal area = (BigDecimal) row[1];
+            String className = (String) row[2];
+            String geoJson = (String) row[3];
 
-            GeometryDTO classificationGeometry = new GeometryDTO();
+            System.out.println("---------------------");
+            System.out.println("id: " + id);
+            System.out.println("Área: " + area);
+            System.out.println("Classe: " + className);
+
+            System.out.println("---------------------");
+
+            // Criar GeometryDTO a partir do geoJson
+            GeometryDTO geometry = new GeometryDTO();
             try {
-                classificationGeometry.convertToGeoJson(falsePositive.getCoordinates());
+                geometry.convertToGeoJson(geoJson);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
+                continue; // pula este item com erro
             }
-            ManualClassificationFeature feature = new ManualClassificationFeature(classificationProperties, classificationGeometry);
-            falsePositiveClassificationCollection.getFeatures().add(feature);
+
+            // Criar ClassificationProperties
+            ClassificationProperties properties = new ClassificationProperties(id, area, className);
+
+            // Criar ManualClassificationFeature
+            ManualClassificationFeature feature = new ManualClassificationFeature(properties, geometry);
+
+            features.add(feature);
+        
         }
-        return falsePositiveClassificationCollection;
+        // Criar a FeatureCollection final
+        ManualClassificationFeatureCollection falsePositiveCollection = new ManualClassificationFeatureCollection();
+        falsePositiveCollection.setFeatures(features);
+        falsePositiveCollection.setIdField(fieldId);
+
+
+        System.out.println("=== False Positives ===");
+        for (ManualClassificationFeature f : features) {
+            ClassificationProperties p = f.getProperties();
+            System.out.println("ID: " + p.getId() + ", Área: " + p.getArea() + ", Classe: " + p.getClassEntity());
+        }
+        System.out.println("=======================");
+        return falsePositiveCollection;
     }
+
 
     public ManualClassificationFeatureCollection getFalseNegativeByFieldId(Long id){
         List<ClassificationDTO> falseNegativeClassification = manualClassificationRepository.getManualClassificationByFieldId(id);
@@ -374,6 +400,6 @@ public class ClassificationService {
             falseNegativeClassificationCollection.getFeatures().add(feature);
         }
 
-        return falseNegativeClassificationCollection;
+        return new ManualClassificationFeatureCollection();
     }
 }
