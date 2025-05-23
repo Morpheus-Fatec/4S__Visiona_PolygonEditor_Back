@@ -210,6 +210,7 @@ public class FieldService {
         properties.setStatus(statusProp.getPortugueseValue());
         properties.setSoil(field.getSoil());
         properties.setFarm(farmDTO);
+        properties.setProductivity(field.getProductivity());
 
         GeometryDTO geometry = new GeometryDTO();
         try {
