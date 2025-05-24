@@ -210,6 +210,7 @@ public class FieldService {
         properties.setStatus(statusProp.getPortugueseValue());
         properties.setSoil(field.getSoil());
         properties.setFarm(farmDTO);
+        properties.setProductivity(field.getProductivity());
 
         GeometryDTO geometry = new GeometryDTO();
         try {
@@ -260,7 +261,6 @@ public class FieldService {
         return mapToDto(updatedField);
     }
     
-
     private void validate(FieldUpdatesDTO dto) {
         if (dto.getName() == null || dto.getName().trim().isEmpty()) {
             throw new DefaultException("O nome do Talhão é obrigatório.");

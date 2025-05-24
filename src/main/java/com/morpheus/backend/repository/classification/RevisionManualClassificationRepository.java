@@ -15,7 +15,7 @@ public interface RevisionManualClassificationRepository extends JpaRepository<Re
 
     @Query(value = """
         SELECT 
-            rca.id_controle_classificacao AS id,
+            rca.id_revisao_classificacao_manual AS id,
             ST_AsGeoJSON(rca.coordenadas_destaque) AS coordinates,
             rca.comentario AS comment
         FROM 
