@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,34 +13,13 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.morpheus.backend.entity.classifications.AutomaticClassification;
-import com.morpheus.backend.entity.classifications.ClassificationControl;
-import com.morpheus.backend.entity.classifications.ManualClassification;
-import com.morpheus.backend.entity.classifications.RevisionManualClassification;
+import com.morpheus.backend.entity.Field;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.morpheus.backend.DTO.ClassificationDTO;
-import com.morpheus.backend.DTO.GeoJsonView.GeometryDTO;
-import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationFeature;
-import com.morpheus.backend.DTO.GeoJsonView.classification.ClassificationProperties;
-import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationCollection;
-import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeature;
-import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
-import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollection;
-import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollectionDTO;
-import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollectionOut;
-import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionFeature;
-import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionProperties;
 import com.morpheus.backend.entity.ClassEntity;
-import com.morpheus.backend.entity.User;
+import com.morpheus.backend.entity.Classification;
 import com.morpheus.backend.repository.ClassEntityRepository;
-import com.morpheus.backend.repository.FieldRepository;
-import com.morpheus.backend.entity.Field;
-import com.morpheus.backend.entity.Status;
-import com.morpheus.backend.repository.UserRepository;
-import com.morpheus.backend.repository.classification.AutomaticClassificationRepository;
-import com.morpheus.backend.repository.classification.ClassificationControlRepository;
-import com.morpheus.backend.repository.classification.ManualClassificationRepository;
-import com.morpheus.backend.repository.classification.RevisionManualClassificationRepository;
+import com.morpheus.backend.repository.ClassificationRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -49,51 +27,16 @@ import jakarta.transaction.Transactional;
 public class ClassificationService {
 
     @Autowired
-    private AutomaticClassificationRepository automaticClassificationRepository;
-
-    @Autowired
-    private ManualClassificationRepository manualClassificationRepository;
-
-    @Autowired
-    private RevisionManualClassificationRepository revisionManualClassificationRepository;
-
-    @Autowired
-    private ClassificationControlRepository classificationControlRepository;
+    private ClassificationRepository classificationRepository;
 
     @Autowired
     private ClassEntityRepository classEntityRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private FieldRepository fieldRepository;
-
-    public List<ClassificationFeature> getAutomaticClassificationsByFieldId(Long fieldId) {
-        List<ClassificationDTO> classifications = automaticClassificationRepository.getAutomaticClassificationByFieldId(fieldId);
-            List<ClassificationFeature> classificationDTOs = classifications.stream().map(classification -> {
-            ClassificationFeature classificationDTO = new ClassificationFeature();
-            ClassificationProperties classificationProperties = new ClassificationProperties(classification.getId(), classification.getArea(), classification.getClassEntity());
-            GeometryDTO classificationGeometry = new GeometryDTO();
-            try {
-                classificationGeometry.convertToGeoJson(classification.getCoordinates());
-            } catch (JsonProcessingException e) {
-
-                e.printStackTrace();
-            }
-            classificationDTO.setProperties(classificationProperties);
-            classificationDTO.setGeometry(classificationGeometry);
-            return classificationDTO;
-        }).collect(Collectors.toList());
-
-        return classificationDTOs;
-    }
-
     @Transactional
-    public void saveAutomaticClassification(ClassificationControl control, List<ClassificationDTO> automaticClassificationDTO) throws JsonProcessingException {
-        List<AutomaticClassification> automaticClassifications = new ArrayList<>();
+    public void createClassification(Field field, List<ClassificationDTO> classificationDTOs) throws JsonProcessingException {
+        List<Classification> classifications = new ArrayList<>();
         Map<String, ClassEntity> classEntityCache = new HashMap<>();
-        Set<String> classEntityNames = automaticClassificationDTO.stream()
+        Set<String> classEntityNames = classificationDTOs.stream()
                 .map(ClassificationDTO::getClassEntity)
                 .collect(Collectors.toSet());
 
@@ -116,13 +59,13 @@ public class ClassificationService {
             classEntityRepository.saveAll(newClassEntities);
         }
 
-        for (ClassificationDTO classificationDTO : automaticClassificationDTO) {
-            AutomaticClassification classificationAutomatic = new AutomaticClassification();
-            classificationAutomatic.setClassificationControl(control);
-            classificationAutomatic.setArea(classificationDTO.getArea());
-            classificationAutomatic.setCoordenadas(classificationDTO.convertStringToMultiPolygon());
-            classificationAutomatic.setClassEntity(classEntityCache.get(classificationDTO.getClassEntity()));
-            automaticClassifications.add(classificationAutomatic);
+        for (ClassificationDTO classificationDTO : classificationDTOs) {
+            Classification classificationEntity = new Classification();
+            classificationEntity.setField(field);
+            classificationEntity.setArea(classificationDTO.getArea());
+            classificationEntity.setOriginalCoordinates(classificationDTO.convertStringToMultiPolygon());
+            classificationEntity.setClassEntity(classEntityCache.get(classificationDTO.getClassEntity()));
+            classifications.add(classificationEntity);
         }
 
         automaticClassificationRepository.saveAll(automaticClassifications);

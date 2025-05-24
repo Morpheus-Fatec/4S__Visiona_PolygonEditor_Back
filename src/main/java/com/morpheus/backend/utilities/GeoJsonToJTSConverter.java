@@ -14,7 +14,6 @@ import com.bedatadriven.jackson.datatype.jts.JtsModule;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.morpheus.backend.config.GeoJsonParseException;
 
 @Component
 public class GeoJsonToJTSConverter {
@@ -31,7 +30,7 @@ public class GeoJsonToJTSConverter {
 
             return convertToMultiPolygon(jsonNode);
         } catch (JsonProcessingException e) {
-            throw new GeoJsonParseException("O GeoJSON enviado está mal formatado ou vazio." + e.getMessage(), e);
+            throw new RuntimeException("Erro ao processar GeoJSON: " + e.getMessage(), e);
         }
     }
     public static MultiPolygon convertToMultiPolygon(JsonNode jsonNode) {
@@ -61,7 +60,7 @@ public class GeoJsonToJTSConverter {
             }
             return geometryFactory.createMultiPolygon(polygonList.toArray(new Polygon[0]));
         } catch (Exception e) {
-            throw new GeoJsonParseException("Erro ao converter GeoJSON para MultiPolygon: " + e.getMessage(), e);
+            throw new RuntimeException("Erro ao converter para MultiPolygon: " + e.getMessage(), e);
         }
     }
 

@@ -10,14 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ErrorResponse {
-    private String message;
-    private String details;
-    private int status;
-    private String timestamp;
-    private String developerMessage;
+    private String error;
 
-    public ErrorResponse(String message, String developerMessage) {
-        this.message = message;
-        this.developerMessage = developerMessage;
-    }
+
 }

@@ -10,6 +10,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SoilDTO {
-    private Long id_solo;
-    private String nome;
+    private String name;
 }

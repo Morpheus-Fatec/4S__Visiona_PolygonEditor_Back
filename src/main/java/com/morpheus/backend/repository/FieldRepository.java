@@ -17,21 +17,16 @@ public interface FieldRepository extends JpaRepository<Field, Long>{
     @Query(value = """
     SELECT 
         t.id_talhao AS id,
-        t.id_leitura AS scanningId,
         t.nome AS nome,
-        t.produtividade AS productivity,
         fa.nome AS farmName,
-        c.id_cultura AS cultureId,
-        c.nome AS cultureNome,
+        c.nome AS culture,
         ST_AsGeoJSON(t.coordenadas) AS coordinates,
         t.estado AS status,
         t.area AS area,
         t.safra AS harvest,
         fa.cidade as farmCity,
         fa.estado as farmState,
-        fa.id_fazenda as farm_id,
-        so.nome as soilName,
-        so.id_solo as soilId
+        so.nome as soil
     FROM Talhoes t
     JOIN Fazendas fa ON t.id_fazenda = fa.id_fazenda
     LEFT JOIN Culturas c ON t.id_cultura = c.id_cultura
@@ -40,52 +35,19 @@ public interface FieldRepository extends JpaRepository<Field, Long>{
     """, nativeQuery = true)
     Optional<FieldDTO> getFieldById(@Param("fieldId") Long fieldId);
 
-
-    @Query("SELECT f FROM Field f WHERE f.id = :fieldId")
-    Field getFieldEntityById(Long fieldId);
-
     @Query(value = """
         SELECT 
             t.id_talhao AS id,
             t.nome AS nome,
             fa.nome AS farmName,
-            c AS culture,
+            c.nome AS culture,
             ST_AsGeoJSON(t.coordenadas) AS coordinates,
             t.estado AS status,
             t.area AS area,
             t.safra AS harvest,
             fa.cidade as farmCity,
             fa.estado as farmState,
-            so as soil,
-            t.id_leitura AS scanningId
-        FROM Talhoes t
-        JOIN Fazendas fa ON t.id_fazenda = fa.id_fazenda
-        LEFT JOIN Culturas c ON t.id_cultura = c.id_cultura
-        LEFT JOIN Solos so ON t.id_solo = so.id_solo
-        WHERE t.id_leitura = :scanId
-        LIMIT 1
-    """, nativeQuery = true)
-    Optional<FieldDTO> getFieldByScanningId(@Param("scanId") Long scanId);
-
-
-
-    @Query(value = """
-        SELECT 
-            t.id_talhao AS id,
-            t.nome AS nome,
-            t.produtividade AS productivity,
-            fa.nome AS farmName,
-            c.id_cultura AS cultureId,
-            c.nome AS cultureNome,
-            ST_AsGeoJSON(t.coordenadas) AS coordinates,
-            t.estado AS status,
-            t.area AS area,
-            t.safra AS harvest,
-            fa.cidade as farmCity,
-            fa.estado as farmState,
-            fa.id_fazenda as farm_id,
-            so.nome as soilName,
-            so.id_solo as soilId
+            so.nome as soil
         FROM Talhoes t
         JOIN Fazendas fa ON t.id_fazenda = fa.id_fazenda
         LEFT JOIN Culturas c ON t.id_cultura = c.id_cultura
@@ -121,8 +83,5 @@ public interface FieldRepository extends JpaRepository<Field, Long>{
         @Param("farmName") String farmNam,
         Pageable pageable
     );
-
-    boolean existsByFarm_FarmName(String farmName);
-    boolean existsByCulture_Name(String cultureName);
-    boolean existsBySoil_Name(String soilName);
+    
 }

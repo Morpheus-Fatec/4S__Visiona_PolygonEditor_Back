@@ -13,7 +13,4 @@ public class FarmDTO {
     private String farmName;
     private String farmCity;
     private String farmState;
-
-    private Long farm_id;
 }
-

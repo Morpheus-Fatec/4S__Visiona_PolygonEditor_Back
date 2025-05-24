@@ -1,75 +1,98 @@
 package com.morpheus.backend.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
+import com.morpheus.backend.DTO.CultureDTO;
 import com.morpheus.backend.entity.Culture;
 import com.morpheus.backend.repository.CultureRepository;
-import com.morpheus.backend.repository.FieldRepository;
 import com.morpheus.exceptions.DefaultException;
 
 @Service
 public class CultureService {
 
     @Autowired
-    private CultureRepository cultureRepository;
+    CultureRepository cultureRepository;
 
-    @Autowired
-    private FieldRepository fieldRepository;
+    public String createCulture(CultureDTO cultureName){
+        try {
+            if(cultureName.getName().isEmpty()){
+                throw new Exception();
+            }
+            
+            Culture culture = new Culture();
+            culture.setName(cultureName.getName());
+            cultureRepository.save(culture);
 
-    public List<Culture> getAllCultures() {
-        List<Culture> cultures = cultureRepository.findAll();
-        if (cultures.isEmpty()) {
+            return "Cultura de " + cultureName.getName() + " criada com sucesso.";
+        } catch (Exception e) {
+            throw new DefaultException("Não foi possível criar a cultura.");
+        }
+    }
+
+    public List<Culture> getAllCultures(){
+        try {
+            List<Culture> cultures = cultureRepository.findAll();
+            
+            if(cultures.isEmpty()){
+                throw new Exception();
+            }
+            
+            return cultures;
+        } catch (Exception e) {
             throw new DefaultException("Não foi possível encontrar culturas.");
         }
-        return cultures;
     }
 
-    public Culture getCultureById(Long id) {
-        return Optional.ofNullable(cultureRepository.getCultureById(id))
-                .orElseThrow(() -> new DefaultException("Cultura com ID " + id + " não encontrada."));
+    public Culture getCultureById(Long id){
+        try {
+            Culture culture = cultureRepository.findById(id).get();
+
+            if(culture == null){
+                throw new Exception();
+            }
+
+            return culture;
+        } catch (Exception e) {
+            throw new DefaultException("Não foi possível encontrar a cultura.");
+        }
     }
 
-    public String createCulture(String cultureName) {
-        if (!StringUtils.hasText(cultureName)) {
-            throw new DefaultException("O nome da cultura não pode ser vazio ou nulo.");
+    public String updateCultureName(Long id, String cultureName){
+        try {
+            String oldName = "";
+            Culture culture = cultureRepository.getCultureById(id);
+
+            if(culture == null){
+                throw new Exception();
+            }
+            if(cultureName.isEmpty()){
+                throw new Exception();
+            }
+
+            oldName = culture.getName();
+            culture.setName(cultureName);
+            cultureRepository.save(culture);
+
+            return "Nome da cultura atualizado de " + oldName + " para " + cultureName + ".";
         }
-
-        Culture culture = new Culture();
-        culture.setName(cultureName);
-        cultureRepository.save(culture);
-
-        return "Cultura de " + culture.getName() + " criada com sucesso.";
+        catch (Exception e) {
+            throw new DefaultException("Não foi possível atualizar o nome da cultura.");
+        }
     }
 
-    public String updateCulture(Long id, String cultureName) {
-        if (!StringUtils.hasText(cultureName)) {
-            throw new DefaultException("O novo nome da cultura não pode ser vazio ou nulo.");
+    public String deleteCulture(Long id){
+        try {
+            Culture culture = cultureRepository.getCultureById(id);
+            if(culture == null){
+                throw new Exception();
+            }
+            cultureRepository.delete(culture);
+            return "Cultura de " + culture.getName() + " deletada com sucesso.";
+        } catch (Exception e) {
+            throw new DefaultException("Não foi possível deletar a cultura.");
         }
-
-        Culture culture = getCultureById(id);
-        if (fieldRepository.existsByCulture_Name(culture.getName())) {
-            throw new DefaultException("Não é possível atualizar o nome da cultura, pois ela está associada a um talhão.");
-        }
-        String oldName = culture.getName();
-        culture.setName(cultureName);
-        cultureRepository.save(culture);
-
-        return "Nome da cultura atualizado de " + oldName + " para " + cultureName + ".";
-    }
-
-    public String deleteCulture(Long id) {
-        Culture culture = getCultureById(id);
-
-        if (fieldRepository.existsByCulture_Name(culture.getName())) {
-            throw new DefaultException("Não é possível deletar a cultura, pois ela está associada a um talhão.");
-        }
-
-        cultureRepository.delete(culture);
-        return "Cultura de " + culture.getName() + " deletada com sucesso.";
     }
 }

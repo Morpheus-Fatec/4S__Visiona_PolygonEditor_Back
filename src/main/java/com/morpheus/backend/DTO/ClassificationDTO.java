@@ -9,10 +9,8 @@ import com.morpheus.backend.utilities.Converter;
 import com.morpheus.backend.utilities.GeoJsonToJTSConverter;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 public class ClassificationDTO implements Converter {
 
     private static GeoJsonToJTSConverter geoJsonToJTSConverter = new GeoJsonToJTSConverter();;

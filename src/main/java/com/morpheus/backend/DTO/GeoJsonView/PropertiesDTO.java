@@ -2,9 +2,7 @@ package com.morpheus.backend.DTO.GeoJsonView;
 
 import java.math.BigDecimal;
 
-import com.morpheus.backend.DTO.CultureDTO;
 import com.morpheus.backend.DTO.FarmDTO;
-import com.morpheus.backend.DTO.SoilDTO;
 
 import lombok.Data;
 
@@ -13,12 +11,12 @@ public class PropertiesDTO {
 
     private Long id;
     private String name;
-    private CultureDTO culture;
+    private String culture;
     private BigDecimal area;
     private String harvest;
     private String status;
-    private SoilDTO soil;
-    private String productivity;
+    private String soil;
+    private Float productivity;
     private FarmDTO farm;
 }
 

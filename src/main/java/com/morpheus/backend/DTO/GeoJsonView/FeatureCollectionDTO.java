@@ -6,8 +6,4 @@ import lombok.Data;
 public class FeatureCollectionDTO {
     private String type = "FeatureCollection";
     FieldFeatureDTO features;
-
-    public FeatureCollectionDTO(FieldFeatureDTO features) {
-        this.features = features;
-    }
 }
