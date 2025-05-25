@@ -28,7 +28,7 @@ public class ComparativeAnalysisController {
     }
 
     @GetMapping("/qualidadeanalistas/{analystId}")
-    public ResponseEntity<AnalystQualityDTO> compare(@PathVariable Long analystId) {
+    public ResponseEntity<AnalystQualityDTO> compare(@RequestParam(required = false) Long analystId) {
         AnalystQualityDTO dto = comparativeAnalysisService.getQualityGeral(analystId);
         return ResponseEntity.ok(dto);
     }

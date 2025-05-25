@@ -26,12 +26,12 @@ public interface ClassificationControlRepository extends JpaRepository<Classific
     Long getConsultationResponsableByFieldId(@Param("fieldId") Long fieldId);
 
     
-   @Query(value = """
+    @Query(value = """
         WITH revisoes_por_classificacao AS (
             SELECT cc.id_controle_classificacao, COUNT(rcm.id_revisao_classificacao_manual) AS total_revisoes
             FROM controle_classificacao cc
             LEFT JOIN revisao_classificacao_manual rcm ON cc.id_controle_classificacao = rcm.id_controle_classificacao
-            WHERE cc.id_analista = :idAnalista
+            WHERE (:idAnalista IS NULL OR cc.id_analista = :idAnalista)
             GROUP BY cc.id_controle_classificacao
         )
         SELECT
@@ -45,6 +45,7 @@ public interface ClassificationControlRepository extends JpaRepository<Classific
         GROUP BY classificacao_revisao
     """, nativeQuery = true)
     List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista);
+    
 
     @Query(value = """
         WITH revisoes_por_classificacao AS (
