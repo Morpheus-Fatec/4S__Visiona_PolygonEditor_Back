@@ -223,6 +223,16 @@ List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista)
         ORDER BY mes
         """, nativeQuery = true)
     List<Object[]> findMonthlyAreaByAllConsultants();
+
+    @Query(value = """
+        SELECT COUNT(t.id_talhao)
+        FROM talhoes AS t
+        LEFT JOIN controle_classificacao AS cc ON t.id_talhao = cc.id_talhao
+        LEFT JOIN revisao_classificacao_manual AS rcm ON cc.id_controle_classificacao = rcm.id_controle_classificacao
+        WHERE rcm.id_revisao_classificacao_manual IS NULL
+        """, nativeQuery = true)
+    Long countUneditedFields();
+
 }
 
 

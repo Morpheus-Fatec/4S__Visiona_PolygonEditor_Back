@@ -19,6 +19,7 @@ import com.morpheus.backend.DTO.Analysis.MonthlyAreaDTO;
 import com.morpheus.backend.DTO.Analysis.MonthlyConsultantAreaDTO;
 import com.morpheus.backend.DTO.Analysis.ProductivityComparisonDTO;
 import com.morpheus.backend.DTO.Analysis.TableAnalystDTO;
+import com.morpheus.backend.DTO.Analysis.UneditedFieldDTO;
 import com.morpheus.backend.repository.classification.ClassificationControlRepository;
 
 @Service
@@ -89,7 +90,7 @@ public class ComparativeAnalysisService {
     private double round(Double value) {
         if (value == null) return 0.0;
         return BigDecimal.valueOf(value)
-                .setScale(7, RoundingMode.HALF_UP)
+                .setScale(6, RoundingMode.HALF_UP)
                 .doubleValue();
     }
 
@@ -150,4 +151,10 @@ public class ComparativeAnalysisService {
         dto.setDezembro(monthToAreaMap.getOrDefault(12, 0.0).intValue());
         return dto;
     }
+
+    public UneditedFieldDTO getUneditedFieldCount() {
+        Long count = classificationControlRepository.countUneditedFields();
+        return new UneditedFieldDTO(count);
+    }
+    
 }

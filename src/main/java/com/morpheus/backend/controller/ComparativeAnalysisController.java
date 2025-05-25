@@ -16,6 +16,7 @@ import com.morpheus.backend.DTO.Analysis.AutomaticAnalysisHealthDTO;
 import com.morpheus.backend.DTO.Analysis.MonthlyConsultantAreaDTO;
 import com.morpheus.backend.DTO.Analysis.ProductivityComparisonDTO;
 import com.morpheus.backend.DTO.Analysis.TableAnalystDTO;
+import com.morpheus.backend.DTO.Analysis.UneditedFieldDTO;
 import com.morpheus.backend.service.ComparativeAnalysisService;
 
 @RestController
@@ -69,4 +70,10 @@ public class ComparativeAnalysisController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/talhoes-nao-revisados")
+    public ResponseEntity<UneditedFieldDTO> getUneditedFields() {
+        return ResponseEntity.ok(comparativeAnalysisService.getUneditedFieldCount());
+    }
+
 }
