@@ -152,4 +152,9 @@ public class UserService {
     }
 
     
+    public String analistNameByFieldId(Long fieldId){
+        String analistName = userRepository.findAnalystNameByFieldId(fieldId);
+        return analistName;
+    }
+    
 }

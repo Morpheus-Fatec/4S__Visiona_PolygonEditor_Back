@@ -56,5 +56,13 @@ public class UserController {
         }
     }
 
+    @GetMapping("/analistName/{idfield}")
+    public ResponseEntity<String> getanalistByFieldName(
+        @PathVariable("idfield") Long idfield
+    ) {
+        String result = userService.analistNameByFieldId(idfield);
+        return ResponseEntity.ok(result);
+    }
+
     
 }
