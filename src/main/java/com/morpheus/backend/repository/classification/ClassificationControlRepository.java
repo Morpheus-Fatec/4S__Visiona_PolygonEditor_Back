@@ -163,9 +163,15 @@ List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista)
     );
 
     @Query(value = """
-    WITH classificacoes_com_datas AS (
+    WITH meses AS (
+        SELECT generate_series(
+            date_trunc('month', CURRENT_DATE) - interval '2 months',
+            date_trunc('month', CURRENT_DATE),
+            interval '1 month'
+        ) AS mes
+    ),
+    classificacoes_com_datas AS (
         SELECT 
-            cc.id_controle_classificacao,
             DATE_TRUNC('month', cc.date_time_created) AS mes,
             cm.area AS area_inicial,
             rcm.area_metros_quadrados AS area_final
@@ -180,15 +186,16 @@ List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista)
             ORDER BY rcm.id_revisao_classificacao_manual DESC
             LIMIT 1
         ) rcm ON true
-        WHERE cc.date_time_created >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '3 months'
+        WHERE cc.date_time_created >= date_trunc('month', CURRENT_DATE) - interval '2 months'
     )
     SELECT 
-        TO_CHAR(mes, 'YYYY-MM') AS month,
-        SUM(area_inicial) AS initial_area,
-        SUM(COALESCE(area_final, 0)) AS final_area
-    FROM classificacoes_com_datas
-    GROUP BY mes
-    ORDER BY mes
+        TO_CHAR(m.mes, 'YYYY-MM') AS month,
+        COALESCE(SUM(c.area_inicial), 0) AS initial_area,
+        COALESCE(SUM(c.area_final), 0) AS final_area
+    FROM meses m
+    LEFT JOIN classificacoes_com_datas c ON m.mes = c.mes
+    GROUP BY m.mes
+    ORDER BY m.mes;
         """, nativeQuery = true)
     List<Object[]> findMonthlyAreaData();
 
