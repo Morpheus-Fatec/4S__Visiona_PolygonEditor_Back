@@ -3,12 +3,15 @@ package com.morpheus.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationCollection;
+import com.morpheus.backend.DTO.GeoJsonView.manualClassification.ManualClassificationFeatureCollection;
 import com.morpheus.backend.DTO.GeoJsonView.revisionClassification.RevisionClassificationCollection;
 import com.morpheus.backend.service.ClassificationService;
 
@@ -38,5 +41,17 @@ public class ClassificationController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro ao criar classificação de revisão: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/falsePositive/{id}")
+    public ResponseEntity<ManualClassificationFeatureCollection> getFalsePositive(@PathVariable Long id) {
+        ManualClassificationFeatureCollection falsePositive = classificationService.getFalsePositiveByFieldId(id);
+        return ResponseEntity.ok(falsePositive);
+    }
+    
+    @GetMapping("/falseNegative/{id}")
+    public ResponseEntity<ManualClassificationFeatureCollection> getFalseNegative(@PathVariable Long id) {
+        ManualClassificationFeatureCollection falseNegative = classificationService.getFalseNegativeByFieldId(id);
+        return ResponseEntity.ok(falseNegative);
     }
 }
