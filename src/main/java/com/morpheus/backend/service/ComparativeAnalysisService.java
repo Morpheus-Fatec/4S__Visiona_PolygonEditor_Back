@@ -89,7 +89,7 @@ public class ComparativeAnalysisService {
     private double round(Double value) {
         if (value == null) return 0.0;
         return BigDecimal.valueOf(value)
-                .setScale(2, RoundingMode.HALF_UP)
+                .setScale(7, RoundingMode.HALF_UP)
                 .doubleValue();
     }
 

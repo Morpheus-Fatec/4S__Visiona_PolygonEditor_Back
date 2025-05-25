@@ -27,7 +27,7 @@ public class ComparativeAnalysisController {
         this.comparativeAnalysisService = comparativeAnalysisService;
     }
 
-    @GetMapping("/qualidadeanalistas/{analystId}")
+    @GetMapping("/qualidadeanalistas")
     public ResponseEntity<AnalystQualityDTO> compare(@RequestParam(required = false) Long analystId) {
         AnalystQualityDTO dto = comparativeAnalysisService.getQualityGeral(analystId);
         return ResponseEntity.ok(dto);
@@ -38,12 +38,13 @@ public class ComparativeAnalysisController {
         return ResponseEntity.ok(comparativeAnalysisService.getAnalystPerformance());
     }
 
-    @GetMapping("/metricadeprodutividade/{idAnalyst}")
-    public ResponseEntity<ProductivityComparisonDTO> getProductivity(@PathVariable Long idAnalyst) {
+    @GetMapping("/metricadeprodutividade")
+    public ResponseEntity<ProductivityComparisonDTO> getProductivity(
+            @RequestParam(name = "idAnalyst", required = false) Long idAnalyst) {
         return ResponseEntity.ok(comparativeAnalysisService.compareProductivity(idAnalyst));
     }
 
-    @GetMapping("/consultor-mensal/{consultantId}")
+    @GetMapping("/consultor-mensal")
     public ResponseEntity<MonthlyConsultantAreaDTO> getMonthlyReviewedArea(
         @RequestParam(required = false) Long consultantId) {
     MonthlyConsultantAreaDTO dto = comparativeAnalysisService.getMonthlyAreaComparison(consultantId);

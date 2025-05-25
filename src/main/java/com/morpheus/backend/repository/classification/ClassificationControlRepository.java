@@ -26,26 +26,26 @@ public interface ClassificationControlRepository extends JpaRepository<Classific
     Long getConsultationResponsableByFieldId(@Param("fieldId") Long fieldId);
 
     
-    @Query(value = """
-        WITH revisoes_por_classificacao AS (
-            SELECT cc.id_controle_classificacao, COUNT(rcm.id_revisao_classificacao_manual) AS total_revisoes
-            FROM controle_classificacao cc
-            LEFT JOIN revisao_classificacao_manual rcm ON cc.id_controle_classificacao = rcm.id_controle_classificacao
-            WHERE (:idAnalista IS NULL OR cc.id_analista = :idAnalista)
-            GROUP BY cc.id_controle_classificacao
-        )
-        SELECT
-            CASE
-                WHEN total_revisoes = 1 THEN 'Ideais'
-                WHEN total_revisoes <= 2 THEN 'Aceitaveis'
-                ELSE 'Ruim'
-            END AS classificacao_revisao,
-            COUNT(*) AS quantidade
-        FROM revisoes_por_classificacao
-        GROUP BY classificacao_revisao
-    """, nativeQuery = true)
-    List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista);
-    
+@Query(value = """
+    WITH revisoes_por_classificacao AS (
+        SELECT cc.id_controle_classificacao, COUNT(rcm.id_revisao_classificacao_manual) AS total_revisoes
+        FROM controle_classificacao cc
+        LEFT JOIN revisao_classificacao_manual rcm ON cc.id_controle_classificacao = rcm.id_controle_classificacao
+        WHERE (:idAnalista IS NULL OR cc.id_analista = :idAnalista)
+        GROUP BY cc.id_controle_classificacao
+    )
+    SELECT
+        CASE
+            WHEN total_revisoes = 1 THEN 'Ideais'
+            WHEN total_revisoes <= 2 THEN 'Aceitaveis'
+            ELSE 'Ruim'
+        END AS classificacao_revisao,
+        COUNT(*) AS quantidade
+    FROM revisoes_por_classificacao
+    GROUP BY classificacao_revisao
+""", nativeQuery = true)
+List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista);
+
 
     @Query(value = """
         WITH revisoes_por_classificacao AS (
@@ -88,7 +88,7 @@ public interface ClassificationControlRepository extends JpaRepository<Classific
     """, nativeQuery = true)
     List<Object[]> getAnalystPerformanceData();
 
-   @Query(value = """
+    @Query(value = """
         SELECT
           CASE 
             WHEN SUM(cc.time_spent_manual) = 0 THEN 0
@@ -97,11 +97,10 @@ public interface ClassificationControlRepository extends JpaRepository<Classific
         FROM controle_classificacao cc
         JOIN talhoes t ON cc.id_talhao = t.id_talhao
         WHERE t.estado = 'APPROVED'
-          AND cc.id_analista = :analystId
+          AND (:analystId IS NULL OR cc.id_analista = :analystId)
     """, nativeQuery = true)
     Double getAnalystProductivity(@Param("analystId") Long analystId);
-
-
+    
     @Query(value = """
         WITH analistas_data AS (
           SELECT
