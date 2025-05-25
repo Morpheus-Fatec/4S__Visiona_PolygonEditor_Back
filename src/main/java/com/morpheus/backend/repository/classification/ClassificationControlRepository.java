@@ -163,29 +163,32 @@ List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista)
     );
 
     @Query(value = """
-        WITH classificacoes_com_datas AS (
-            SELECT 
-                cc.id_controle_classificacao,
-                DATE_TRUNC('month', cc.date_time_created) AS mes,
-                cm.area AS area_inicial,
-                (
-                    SELECT area
-                    FROM classificacao_manual rcm
-                    WHERE rcm.id_controle_classificacao = cc.id_controle_classificacao
-                    ORDER BY rcm.id_classificacao_manual DESC
-                    LIMIT 1
-                ) AS area_final
-            FROM controle_classificacao cc
-            JOIN classificacao_manual cm ON cm.id_controle_classificacao = cc.id_controle_classificacao
-            WHERE cc.date_time_created >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '3 months'
-        )
+    WITH classificacoes_com_datas AS (
         SELECT 
-            TO_CHAR(mes, 'YYYY-MM') AS month,
-            SUM(area_inicial) AS initial_area,
-            SUM(COALESCE(area_final, 0)) AS final_area
-        FROM classificacoes_com_datas
-        GROUP BY mes
-        ORDER BY mes
+            cc.id_controle_classificacao,
+            DATE_TRUNC('month', cc.date_time_created) AS mes,
+            cm.area AS area_inicial,
+            rcm.area_metros_quadrados AS area_final
+        FROM controle_classificacao cc
+        JOIN classificacao_manual cm ON cm.id_controle_classificacao = cc.id_controle_classificacao
+        LEFT JOIN LATERAL (
+            SELECT 
+                ST_Area(ST_Transform(coordenadas_destaque, 5880)) AS area_metros_quadrados
+            FROM revisao_classificacao_manual rcm
+            WHERE rcm.id_controle_classificacao = cc.id_controle_classificacao
+            AND coordenadas_destaque IS NOT NULL
+            ORDER BY rcm.id_revisao_classificacao_manual DESC
+            LIMIT 1
+        ) rcm ON true
+        WHERE cc.date_time_created >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '3 months'
+    )
+    SELECT 
+        TO_CHAR(mes, 'YYYY-MM') AS month,
+        SUM(area_inicial) AS initial_area,
+        SUM(COALESCE(area_final, 0)) AS final_area
+    FROM classificacoes_com_datas
+    GROUP BY mes
+    ORDER BY mes
         """, nativeQuery = true)
     List<Object[]> findMonthlyAreaData();
 
