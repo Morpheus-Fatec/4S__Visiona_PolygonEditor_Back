@@ -1,5 +1,6 @@
 package com.morpheus.backend.service;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,8 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -141,7 +140,6 @@ public class ClassificationService {
         ManualClassificationFeatureCollection manualClassificationCollection = new ManualClassificationFeatureCollection();
         manualClassificationCollection.setIdField(fieldId);
         manualClassificationCollection.setIdUserResponsable(idUserResponsable);
-        manualClassificationCollection.setFeatures(new ArrayList<>());
     
         for (ClassificationDTO manual : manualClassifications) {
             ClassificationProperties classificationProperties = new ClassificationProperties(
@@ -168,8 +166,8 @@ public class ClassificationService {
         Field field = fieldRepository.getFieldEntityById(manualDTO.getIdField());
         ClassificationControl control = classificationControlRepository.findByFieldId(manualDTO.getIdField());
         User userResponsable = userRepository.getUserById(manualDTO.getUserResponsable());
-        Duration duration = null;
 
+        Duration duration;
         try {
             duration = Duration.between(manualDTO.getBegin(), manualDTO.getEnd());
         } catch (Exception e) {
@@ -178,7 +176,9 @@ public class ClassificationService {
 
         if (control.getAnalystResponsable() == null) {
             control.setAnalystResponsable(userResponsable);
-        } else if (!Objects.equals(control.getAnalystResponsable().getId(), userResponsable.getId())) {
+        } 
+
+        if (!control.getAnalystResponsable().getId().equals(manualDTO.getUserResponsable())) {
             throw new RuntimeException("Este controle de classificação já está sendo editado por outro usuário.");
         }
 
@@ -194,36 +194,32 @@ public class ClassificationService {
         field.setStatus(Status.UNDER_ANALYSIS);
         fieldRepository.save(field);
 
-        manualClassificationRepository.deleteByClassificationControl(control);
+        manualClassificationRepository.deleteAllByControlId(control.getIdControle());
 
         Set<ClassificationFeature> uniqueFeatures = new HashSet<>(manualDTO.getFeatures());
+        String classEntityName = uniqueFeatures.iterator().next().getProperties().getClassEntity();
+        ClassEntity classEntity = classEntityRepository.findByName(classEntityName)
+            .orElseThrow(() -> new RuntimeException("Classe não encontrada: " + classEntityName));
 
-        try {
-            for (ClassificationFeature feature : uniqueFeatures) {
-                ManualClassification manual = new ManualClassification();
+        List<ManualClassification> manualClassifications = new ArrayList<>();
 
-                manual.setClassificationControl(control);
-                manual.setArea(feature.getProperties().getArea());
+        for (ClassificationFeature feature : uniqueFeatures) {
+            ManualClassification manual = new ManualClassification();
+            manual.setClassificationControl(control);
+            manual.setArea(feature.getProperties().getArea());
+            manual.setClassEntity(classEntity);
+            manual.setCoordenadas(feature.getGeometry().convertStringToMultiPolygon());
 
-                Optional<ClassEntity> optionalClassEntity = classEntityRepository.findByName(feature.getProperties().getClassEntity());
-
-                ClassEntity classEntity = optionalClassEntity.orElseThrow(() ->
-                    new RuntimeException("Classe não encontrada: " + feature.getProperties().getClassEntity())
-                );
-
-                manual.setClassEntity(classEntity);
-                manual.setCoordenadas(feature.getGeometry().convertStringToMultiPolygon());
-
-                manualClassificationRepository.save(manual);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao salvar a classificação manual: " + e.getMessage());
+            manualClassifications.add(manual);
         }
+
+        manualClassificationRepository.saveAll(manualClassifications);
     }
 
-
     public RevisionClassificationCollectionOut getRevisionClassificationByFieldId(Long fieldId){
-        List<RevisionClassificationCollectionDTO> revisions= revisionManualClassificationRepository.findRevisionClassificationOutByFieldId(fieldId);
+        List<RevisionClassificationCollectionDTO> revisions = revisionManualClassificationRepository.findRevisionClassificationOutByFieldId(fieldId);
+
+        System.out.println(revisions);
 
         if (revisions == null || revisions.isEmpty()) {
             RevisionClassificationCollectionOut revisionEmpyt = new RevisionClassificationCollectionOut();
@@ -267,10 +263,12 @@ public class ClassificationService {
             throw new RuntimeException("Erro ao calcular a duração: " + e.getMessage());
         }
 
-        if (userResponsable != null) {
-            control.setAnalystResponsable(userResponsable);
-        } else {
-            throw new RuntimeException("é necessário um consultor vinculado.");
+        if (control.getConsultantResponsable() == null) {
+            control.setConsultantResponsable(userResponsable);
+        }
+        
+        if (control.getConsultantResponsable() != null && !control.getConsultantResponsable().getId().equals(userResponsable.getId())) {
+            throw new RuntimeException("Este controle de classificação já está sendo editado por outro usuário.");
         }
 
         if (control.getTimeSpentRevision() == null) {
@@ -309,5 +307,76 @@ public class ClassificationService {
     public List<ManualClassification> findByClassificationControl (ClassificationControl control){
         List<ManualClassification> manual = manualClassificationRepository.findByClassificationControl(control);
         return manual;
+    }
+
+    public ManualClassificationFeatureCollection getFalsePositiveByFieldId(Long fieldId) {
+        ClassificationControl control = classificationControlRepository.findByFieldId(fieldId);
+        List<Object[]> results = classificationControlRepository.getFalsePositivesByControlId(control.getIdControle());
+
+        List<ManualClassificationFeature> features = new ArrayList<>();
+
+        for (Object[] row : results) {
+            Long id = (Long) row[0];
+            BigDecimal area = (BigDecimal) row[1];
+            String className = (String) row[2];
+            String geoJson = (String) row[3];
+
+            GeometryDTO geometry = new GeometryDTO();
+            try {
+                geometry.convertToGeoJson(geoJson);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            ClassificationProperties properties = new ClassificationProperties(id, area, className);
+
+            ManualClassificationFeature feature = new ManualClassificationFeature(properties, geometry);
+
+            features.add(feature);
+    
+        }
+
+        ManualClassificationFeatureCollection falsePositiveCollection = new ManualClassificationFeatureCollection();
+        falsePositiveCollection.setFeatures(features);
+        falsePositiveCollection.setIdField(fieldId);
+
+        return falsePositiveCollection;
+    }
+
+
+    public ManualClassificationFeatureCollection getFalseNegativeByFieldId(Long fieldId){
+         ClassificationControl control = classificationControlRepository.findByFieldId(fieldId);
+         List<Object[]> results = classificationControlRepository.getFalseNegativesByControlId(control.getIdControle());
+
+        List<ManualClassificationFeature> features = new ArrayList<>();
+
+         for (Object[] row : results) {
+            Long id = (Long) row[0];
+            BigDecimal area = (BigDecimal) row[1];
+            String className = (String) row[2];
+            String geoJson = (String) row[3];
+
+            GeometryDTO geometry = new GeometryDTO();
+            try {
+                geometry.convertToGeoJson(geoJson);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            ClassificationProperties properties = new ClassificationProperties(id, area, className);
+
+            ManualClassificationFeature feature = new ManualClassificationFeature(properties, geometry);
+
+            features.add(feature);
+    
+        }
+
+        ManualClassificationFeatureCollection falseNegativeCollection = new ManualClassificationFeatureCollection();
+        falseNegativeCollection.setFeatures(features);
+        falseNegativeCollection.setIdField(fieldId);
+
+        return falseNegativeCollection;
     }
 }
