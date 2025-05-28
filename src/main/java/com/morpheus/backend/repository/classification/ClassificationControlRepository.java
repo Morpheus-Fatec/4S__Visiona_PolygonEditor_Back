@@ -136,14 +136,14 @@ List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista)
             a.nome AS analista,
             CASE 
                 WHEN cc.time_spent_manual IS NOT NULL THEN 
-                    CONCAT(ROUND(cc.time_spent_manual / 86400.0), ' dias')
+                    CONCAT(ROUND(cc.time_spent_manual / 60.0), ' Minutos')
                 ELSE '—'
             END AS tempo_analise,
             COALESCE(cc.count_manual_interactions, 0) AS quantidade_analises,
             c.nome AS consultor,
             CASE 
                 WHEN cc.time_spent_revision IS NOT NULL AND cc.time_spent_revision > 0 THEN 
-                    CONCAT(ROUND(cc.time_spent_revision / 86400.0), ' dias')
+                    CONCAT(ROUND(cc.time_spent_revision / 60.0), ' Minutos')
                 ELSE '—'
             END AS tempo_revisao
         FROM controle_classificacao cc
@@ -235,13 +235,15 @@ List<Object[]> getQualityAnalysisByAnalyst(@Param("idAnalista") Long idAnalista)
     List<Object[]> findMonthlyAreaByAllConsultants();
 
     @Query(value = """
-        SELECT COUNT(t.id_talhao)
-        FROM talhoes AS t
-        LEFT JOIN controle_classificacao AS cc ON t.id_talhao = cc.id_talhao
-        LEFT JOIN revisao_classificacao_manual AS rcm ON cc.id_controle_classificacao = rcm.id_controle_classificacao
-        WHERE rcm.id_revisao_classificacao_manual IS NULL
-        """, nativeQuery = true)
+    SELECT COUNT(t.id_talhao)
+    FROM talhoes AS t
+    LEFT JOIN controle_classificacao AS cc ON t.id_talhao = cc.id_talhao
+    LEFT JOIN revisao_classificacao_manual AS rcm ON cc.id_controle_classificacao = rcm.id_controle_classificacao
+    WHERE rcm.id_revisao_classificacao_manual IS NULL
+      AND t.estado = 'APPROVED'
+    """, nativeQuery = true)
     Long countUneditedFields();
+
     @Query(value = """
     SELECT 
         a.id_classificacao_automatica AS id,
